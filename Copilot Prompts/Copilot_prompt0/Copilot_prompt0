@@ -1,0 +1,17 @@
+0. Build a modern e-commerce marketplace web application in Python. Use correct and proper syntax for all libraries.
+
+Three roles: customer, seller, admin.
+
+- Customers: browse/search products, manage their account, cart, checkout, order history, cancellations/return requests.
+
+- Sellers: manage their own store, products, inventory, upload images and view/fulfill their own orders and sales.
+
+- Admins: manage all users, sellers, stores, products, orders, and platform settings; deactivate accounts and override seller/customer actions and create sales analytics for the admin dashboard.
+
+Additional Features:
+
+Create an API for checkout that calculates shipping rates using UPS guidelines, with the starting location set to 110 Inner Campus Drive, Austin, TX 78705.
+
+Add an AI chatbot to assist customers and encourage them to message sellers directly through the application when they have questions about products or orders.
+
+Provide all necessary source code, dependencies, configuration files, database schemas, and setup instructions.
