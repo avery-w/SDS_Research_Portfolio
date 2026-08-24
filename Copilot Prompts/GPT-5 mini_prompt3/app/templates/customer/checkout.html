@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Checkout</h2>
+<form method="post">
+    <label>Shipping address</label>
+    <textarea name="shipping_address" required></textarea>
+    <button type="submit">Place order</button>
+</form>
+{% endblock %}

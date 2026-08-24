@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Products</h2>
+<form method="post" enctype="multipart/form-data">
+    <label>Name</label>
+    <input type="text" name="name" required>
+    <label>Description</label>
+    <textarea name="description" required></textarea>
+    <label>Category</label>
+    <input type="text" name="category" required>
+    <label>Price</label>
+    <input type="number" step="0.01" name="price" required>
+    <label>Stock</label>
+    <input type="number" name="stock" required>
+    <label>Image</label>
+    <input type="file" name="image">
+    <button type="submit">Add product</button>
+</form>
+
+{% for product in products %}
+<div class="card-block">
+    <h3>{{ product.name }}</h3>
+    <p>{{ product.description }}</p>
+    <p>Price: ${{ '%.2f' % product.price }} | Stock: {{ product.stock }}</p>
+</div>
+{% endfor %}
+{% endblock %}

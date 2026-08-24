@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Store management</h2>
+<form method="post">
+    <label>Store name</label>
+    <input type="text" name="name" value="{{ store.name if store else '' }}" required>
+    <label>Description</label>
+    <textarea name="description" required>{{ store.description if store else '' }}</textarea>
+    <button type="submit">Save store</button>
+</form>
+{% endblock %}

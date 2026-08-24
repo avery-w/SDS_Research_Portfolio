@@ -1,0 +1,15 @@
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
+sqlmodel==0.0.8
+sqlalchemy==2.0.20
+pydantic==1.10.12
+python-multipart==0.0.6
+passlib[bcrypt]==1.7.4
+pyjwt==2.8.0
+python-dotenv==1.0.0
+pgeocode==1.4.0
+aiofiles==23.2.1
+httpx==0.24.1
+python-jose==3.3.0
+Pillow==10.0.1
+openai==0.27.8

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Seller orders</h2>
+{% for order in orders %}
+<div class="card-block">
+    <h3>Order #{{ order.id }}</h3>
+    <p>Total: ${{ '%.2f' % order.total_amount }}</p>
+    <p>Customer: {{ order.user.name }}</p>
+    <p>Status: {{ order.status }}</p>
+    <form method="post" action="{{ url_for('seller.fulfill_order', order_id=order.id) }}">
+        <button type="submit">Mark fulfilled</button>
+    </form>
+</div>
+{% else %}
+<p>No orders yet.</p>
+{% endfor %}
+{% endblock %}

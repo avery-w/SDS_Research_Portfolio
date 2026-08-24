@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-header">
+    <h1>Marketplace</h1>
+    <form class="search-box" method="get">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search products">
+        <button type="submit">Search</button>
+    </form>
+</div>
+
+<div class="product-grid">
+    {% for product in products %}
+    <div class="product-card">
+        <img src="{{ product.image_url or '/static/images/default.png' }}" alt="{{ product.name }}">
+        <div class="product-body">
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description }}</p>
+            <div class="product-meta">
+                <span>${{ '%.2f' % product.price }}</span>
+                <span>{{ product.category }}</span>
+            </div>
+            <form action="{{ url_for('customer.add_to_cart', product_id=product.id) }}" method="post">
+                <button type="submit">Add to cart</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

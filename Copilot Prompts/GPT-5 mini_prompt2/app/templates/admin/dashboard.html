@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin dashboard</h2>
+<p>Search users, stores, or products.</p>
+<form method="get">
+    <input type="text" name="q" value="{{ search }}" placeholder="Search">
+    <button type="submit">Search</button>
+</form>
+
+<div class="stats-grid">
+    <div class="stat-box">
+        <h3>Users</h3>
+        {% for user in users %}
+        <p>{{ user.name }} - {{ user.role }} - {{ 'active' if user.is_active else 'inactive' }}</p>
+        {% endfor %}
+    </div>
+    <div class="stat-box">
+        <h3>Stores</h3>
+        {% for store in stores %}
+        <p>{{ store.name }} - {{ 'active' if store.is_active else 'inactive' }}</p>
+        {% endfor %}
+    </div>
+    <div class="stat-box">
+        <h3>Products</h3>
+        {% for product in products %}
+        <p>{{ product.name }} - {{ 'active' if product.is_active else 'inactive' }}</p>
+        {% endfor %}
+    </div>
+</div>
+
+<h3>Orders</h3>
+{% for order in orders %}
+<div class="card-block">
+    <p>Order #{{ order.id }} - {{ order.user.name }} - ${{ '%.2f' % order.total_amount }} - {{ order.status }}</p>
+</div>
+{% endfor %}
+
+<a class="link-button" href="{{ url_for('admin.settings') }}">Platform settings</a>
+{% endblock %}

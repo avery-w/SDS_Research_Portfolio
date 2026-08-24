@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Shopping cart</h2>
+{% if items %}
+<table class="data-table">
+    <tr><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+    {% for item in items %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ '%.2f' % item.product.price }}</td>
+        <td>${{ '%.2f' % (item.quantity * item.product.price) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<p class="total">Total: ${{ '%.2f' % total }}</p>
+<a class="link-button" href="{{ url_for('customer.checkout') }}">Proceed to checkout</a>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Order history</h2>
+{% for order in orders %}
+<div class="card-block">
+    <h3>Order #{{ order.id }}</h3>
+    <p>Status: {{ order.status }}</p>
+    <p>Total: ${{ '%.2f' % order.total_amount }}</p>
+    <form method="post" action="{{ url_for('customer.return_request', order_id=order.id) }}">
+        <textarea name="reason" placeholder="Reason for return or cancellation" required></textarea>
+        <button type="submit">Request return</button>
+    </form>
+</div>
+{% else %}
+<p>No orders yet.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Customer dashboard</h2>
+<div class="stat-grid">
+    <div class="stat-card">
+        <h3>Recent orders</h3>
+        {% for order in recent_orders %}
+        <p>#{{ order.id }} — ${{ '%.2f' % order.total_amount }} — {{ order.status }}</p>
+        {% else %}
+        <p>No orders yet.</p>
+        {% endfor %}
+    </div>
+</div>
+<a class="button-link" href="{{ url_for('customer.order_history') }}">Order history</a>
+<a class="button-link" href="{{ url_for('customer.account') }}">Manage account</a>
+{% endblock %}

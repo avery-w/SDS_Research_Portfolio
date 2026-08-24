@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Platform settings</h2>
+<form method="post">
+    <label>Platform name</label>
+    <input type="text" name="platform_name" value="Marketplace">
+    <label>Support email</label>
+    <input type="email" name="support_email" value="support@market.local">
+    <button type="submit">Save settings</button>
+</form>
+{% endblock %}

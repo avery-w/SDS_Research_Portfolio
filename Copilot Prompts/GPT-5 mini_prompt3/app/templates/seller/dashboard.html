@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Seller dashboard</h2>
+{% if store %}
+<div class="stat-grid">
+    <div class="stat-card">
+        <h3>Store</h3>
+        <p>{{ store.name }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Orders</h3>
+        <p>{{ orders|length }}</p>
+    </div>
+    <div class="stat-card">
+        <h3>Products</h3>
+        <p>{{ products|length }}</p>
+    </div>
+</div>
+<a class="button-link" href="{{ url_for('seller.store_management') }}">Manage store</a>
+<a class="button-link" href="{{ url_for('seller.product_management') }}">Manage products</a>
+<a class="button-link" href="{{ url_for('seller.seller_orders') }}">View orders</a>
+{% else %}
+<p>You do not have a store yet.</p>
+<a class="button-link" href="{{ url_for('seller.store_management') }}">Create store</a>
+{% endif %}
+{% endblock %}
