@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Products - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">All Products</h2>
+    <div class="card">
+        <div class="card-body">
+            <form method="GET" class="mb-3">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ search }}">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+            <table class="table table-hover">
+                <thead><tr><th>Name</th><th>Store</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for product in products.items %}
+                    <tr>
+                        <td>{{ product.name[:40] }}</td>
+                        <td>{{ product.store.name }}</td>
+                        <td>{{ product.price|currency }}</td>
+                        <td>{{ product.quantity }}</td>
+                        <td><span class="badge bg-{% if product.is_active %}success{% else %}secondary{% endif %}">{% if product.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.toggle_product', product_id=product.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn btn-sm btn-outline-{% if product.is_active %}danger{% else %}success{% endif %}">{% if product.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

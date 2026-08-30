@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Analytics - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Sales Analytics</h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header"><h5>Daily Revenue (Last 30 Days)</h5></div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header"><h5>Orders by Status</h5></div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header"><h5>Top Sellers</h5></div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead><tr><th>Store</th><th>Revenue</th><th>Orders</th></tr></thead>
+                        <tbody>
+                            {% for seller in top_sellers %}
+                            <tr><td>{{ seller[0] }}</td><td>{{ seller[1]|currency }}</td><td>{{ seller[2] }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header"><h5>Category Sales</h5></div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead><tr><th>Category</th><th>Sales</th><th>Units</th></tr></thead>
+                        <tbody>
+                            {% for cat in category_sales %}
+                            <tr><td>{{ cat[0] }}</td><td>{{ cat[1]|currency }}</td><td>{{ cat[2] }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const revenueData = {{ daily_revenue|tojson }};
+const statusData = {{ order_status_counts|tojson }};
+
+new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+        labels: revenueData.map(d => d[0]),
+        datasets: [{
+            label: 'Revenue ($)',
+            data: revenueData.map(d => d[1]),
+            borderColor: '#0d6efd',
+            fill: true,
+            backgroundColor: 'rgba(13,110,253,0.1)'
+        }]
+    }
+});
+
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: statusData.map(s => s[0]),
+        datasets: [{
+            data: statusData.map(s => s[1]),
+            backgroundColor: ['#ffc107', '#0dcaf0', '#0d6efd', '#198754', '#dc3545']
+        }]
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}My Orders - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-box-seam"></i> My Orders</h2>
+    <div class="mb-3">
+        <div class="btn-group">
+            <a href="{{ url_for('customer.orders', status='all') }}" class="btn btn-outline-primary {% if current_status == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('customer.orders', status='pending') }}" class="btn btn-outline-primary {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('customer.orders', status='shipped') }}" class="btn btn-outline-primary {% if current_status == 'shipped' %}active{% endif %}">Shipped</a>
+            <a href="{{ url_for('customer.orders', status='delivered') }}" class="btn btn-outline-primary {% if current_status == 'delivered' %}active{% endif %}">Delivered</a>
+            <a href="{{ url_for('customer.orders', status='cancelled') }}" class="btn btn-outline-primary {% if current_status == 'cancelled' %}active{% endif %}">Cancelled</a>
+        </div>
+    </div>
+    {% if orders.items %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Store</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders.items %}
+                <tr>
+                    <td>{{ order.order_number }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td>{{ order.store.name }}</td>
+                    <td><span class="badge bg-{{ order.status|status_color }}">{{ order.status }}</span></td>
+                    <td>{{ order.total|currency }}</td>
+                    <td><a href="{{ url_for('customer.order_detail', order_number=order.order_number) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox display-1 text-muted"></i>
+        <h4 class="mt-3">No orders found</h4>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

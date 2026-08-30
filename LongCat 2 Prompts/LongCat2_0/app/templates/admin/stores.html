@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Stores - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Manage Stores</h2>
+    <div class="mb-3">
+        <div class="btn-group">
+            <a href="{{ url_for('admin.stores', status='all') }}" class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.stores', status='pending') }}" class="btn btn-outline-secondary {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.stores', status='active') }}" class="btn btn-outline-secondary {% if current_status == 'active' %}active{% endif %}">Active</a>
+            <a href="{{ url_for('admin.stores', status='inactive') }}" class="btn btn-outline-secondary {% if current_status == 'inactive' %}active{% endif %}">Inactive</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead><tr><th>Store</th><th>Owner</th><th>Products</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for store in stores.items %}
+                <tr>
+                    <td>{{ store.name }}</td>
+                    <td>{{ store.owner.full_name }}</td>
+                    <td>{{ store.products.count() }}</td>
+                    <td>
+                        {% if not store.is_approved %}<span class="badge bg-warning">Pending</span>
+                        {% elif store.is_active %}<span class="badge bg-success">Active</span>
+                        {% else %}<span class="badge bg-danger">Inactive</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if not store.is_approved %}
+                        <form method="POST" action="{{ url_for('admin.approve_store', store_id=store.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('admin.toggle_store', store_id=store.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-outline-{% if store.is_active %}danger{% else %}success{% endif %}">{% if store.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <div class="card">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <i class="bi bi-robot fs-4 me-2"></i>
+            <h5 class="mb-0">AI Shopping Assistant</h5>
+        </div>
+        <div class="card-body chat-container" id="chat-container" style="height: 450px; overflow-y: auto;">
+            <div class="chat-message bot-message mb-3">
+                <div class="d-flex">
+                    <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message-content bg-light p-3 rounded" style="max-width: 75%;">
+                        <p class="mb-0">Hello! I'm your AI shopping assistant. I can help you find products, answer questions about shipping and returns, or connect you with sellers. How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <form id="chat-form">
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Type your message..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
+                </div>
+            </form>
+            <div id="seller-suggestion" class="mt-2" style="display: none;">
+                <div class="alert alert-info d-flex justify-content-between align-items-center mb-0">
+                    <span id="suggestion-text"></span>
+                    <a id="suggestion-link" href="#" class="btn btn-sm btn-primary">Message Seller</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const chatContainer = document.getElementById('chat-container');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const sellerSuggestion = document.getElementById('seller-suggestion');
+const suggestionText = document.getElementById('suggestion-text');
+const suggestionLink = document.getElementById('suggestion-link');
+
+chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const message = chatInput.value.trim();
+    if (!message) return;
+
+    appendMessage(message, 'user');
+    chatInput.value = '';
+    sellerSuggestion.style.display = 'none';
+
+    try {
+        const response = await fetch('/chatbot/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        appendMessage(data.response, 'bot');
+
+        if (data.suggest_seller_contact && data.seller_id) {
+            suggestionText.textContent = 'Would you like to message the seller directly?';
+            suggestionLink.href = '/customer/messages/' + data.seller_id;
+            sellerSuggestion.style.display = 'block';
+        }
+    } catch (error) {
+        appendMessage('Sorry, I encountered an error. Please try again.', 'bot');
+    }
+});
+
+function appendMessage(content, type) {
+    const div = document.createElement('div');
+    div.className = `chat-message ${type}-message mb-3`;
+    const isUser = type === 'user';
+    div.innerHTML = `
+        <div class="d-flex ${isUser ? 'justify-content-end' : ''}">
+            ${!isUser ? `<div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;"><i class="bi bi-robot"></i></div>` : ''}
+            <div class="message-content ${isUser ? 'bg-primary text-white' : 'bg-light'} p-3 rounded" style="max-width: 75%;">
+                <p class="mb-0">${content.replace(/\n/g, '<br>')}</p>
+            </div>
+            ${isUser ? `<div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center ms-2" style="width: 36px; height: 36px;"><i class="bi bi-person"></i></div>` : ''}
+        </div>
+    `;
+    chatContainer.appendChild(div);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+</script>
+{% endblock %}

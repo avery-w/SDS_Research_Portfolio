@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Store - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h2>{{ store.name }}</h2>
+            <p class="text-muted">{{ store.description or 'No description' }}</p>
+            {% if current_user.is_authenticated and current_user.is_customer %}
+            <a href="{{ url_for('customer.conversation', user_id=store.seller_id) }}" class="btn btn-outline-primary">
+                <i class="bi bi-chat"></i> Message Seller
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    <h3>Products</h3>
+    <div class="row g-3">
+        {% for product in products.items %}
+        <div class="col-6 col-md-4 col-lg-3">
+            {% include "components/product_card.html" %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

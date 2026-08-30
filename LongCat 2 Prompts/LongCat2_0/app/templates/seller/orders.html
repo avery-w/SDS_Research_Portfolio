@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Orders - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Orders</h2>
+    <div class="mb-3">
+        <div class="btn-group">
+            <a href="{{ url_for('seller.orders', status='all') }}" class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('seller.orders', status='pending') }}" class="btn btn-outline-secondary {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('seller.orders', status='processing') }}" class="btn btn-outline-secondary {% if current_status == 'processing' %}active{% endif %}">Processing</a>
+            <a href="{{ url_for('seller.orders', status='shipped') }}" class="btn btn-outline-secondary {% if current_status == 'shipped' %}active{% endif %}">Shipped</a>
+            <a href="{{ url_for('seller.orders', status='delivered') }}" class="btn btn-outline-secondary {% if current_status == 'delivered' %}active{% endif %}">Delivered</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr><th>Order #</th><th>Customer</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for order in orders.items %}
+                <tr>
+                    <td>{{ order.order_number }}</td>
+                    <td>{{ order.customer.full_name }}</td>
+                    <td>{{ order.created_at.strftime('%b %d, %Y') }}</td>
+                    <td><span class="badge bg-{{ order.status|status_color }}">{{ order.status }}</span></td>
+                    <td>{{ order.total|currency }}</td>
+                    <td><a href="{{ url_for('seller.order_detail', order_number=order.order_number) }}" class="btn btn-sm btn-outline-primary">View</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

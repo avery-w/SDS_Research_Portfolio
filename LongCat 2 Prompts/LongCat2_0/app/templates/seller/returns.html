@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Returns - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4"><i class="bi bi-arrow-return-left"></i> Return Requests</h2>
+    {% if returns.items %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Order #</th><th>Customer</th><th>Reason</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for req in returns.items %}
+                <tr>
+                    <td>{{ req.order.order_number }}</td>
+                    <td>{{ req.customer.full_name }}</td>
+                    <td>{{ req.reason }}</td>
+                    <td><span class="badge bg-{{ req.status|status_color }}">{{ req.status }}</span></td>
+                    <td>{{ req.refund_amount|currency }}</td>
+                    <td>
+                        {% if req.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('seller.handle_return', return_id=req.id, action='approve') }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('seller.handle_return', return_id=req.id, action='reject') }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-check-circle display-1 text-muted"></i>
+        <h4 class="mt-3">No return requests</h4>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

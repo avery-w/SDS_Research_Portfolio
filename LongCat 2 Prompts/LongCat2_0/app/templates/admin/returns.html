@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Returns - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Return Requests</h2>
+    <div class="mb-3">
+        <div class="btn-group">
+            <a href="{{ url_for('admin.returns', status='all') }}" class="btn btn-outline-secondary {% if current_status == 'all' %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.returns', status='pending') }}" class="btn btn-outline-secondary {% if current_status == 'pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.returns', status='approved') }}" class="btn btn-outline-secondary {% if current_status == 'approved' %}active{% endif %}">Approved</a>
+            <a href="{{ url_for('admin.returns', status='rejected') }}" class="btn btn-outline-secondary {% if current_status == 'rejected' %}active{% endif %}">Rejected</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Order #</th><th>Customer</th><th>Reason</th><th>Status</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for req in returns.items %}
+                <tr>
+                    <td>{{ req.order.order_number }}</td>
+                    <td>{{ req.customer.full_name }}</td>
+                    <td>{{ req.reason }}</td>
+                    <td><span class="badge bg-{{ req.status|status_color }}">{{ req.status }}</span></td>
+                    <td>{{ req.refund_amount|currency }}</td>
+                    <td>
+                        {% if req.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin.handle_return', return_id=req.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="approve">
+                            <button class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin.handle_return', return_id=req.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="reject">
+                            <button class="btn btn-sm btn-danger">Reject</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

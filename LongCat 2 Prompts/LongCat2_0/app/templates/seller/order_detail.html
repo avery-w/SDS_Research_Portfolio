@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Order {{ order.order_number }}</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Items</h5>
+                    <table class="table">
+                        <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th></tr></thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr><td>{{ item.product_name }}</td><td>{{ item.product_price|currency }}</td><td>{{ item.quantity }}</td><td>{{ item.subtotal|currency }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Update Status</h5>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">{{ form.status(class="form-select") }}</div>
+                        <div class="mb-3">{{ form.tracking_number.label(class="form-label") }}{{ form.tracking_number(class="form-control") }}</div>
+                        <div class="mb-3">{{ form.notes.label(class="form-label") }}{{ form.notes(class="form-control", rows="2") }}</div>
+                        {{ form.submit(class="btn btn-primary w-100") }}
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5>Customer Info</h5>
+                    <p>{{ order.customer.full_name }}<br>{{ order.customer.email }}</p>
+                    <h6>Shipping Address</h6>
+                    <p>{{ order.shipping_address }}<br>{{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Users - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Manage Users</h2>
+    <div class="card">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col">
+                    <form method="GET" class="d-flex gap-2">
+                        <input type="text" name="q" class="form-control" placeholder="Search users..." value="{{ search }}">
+                        <select name="role" class="form-select" style="width: auto;">
+                            <option value="all" {% if current_role == 'all' %}selected{% endif %}>All Roles</option>
+                            <option value="customer" {% if current_role == 'customer' %}selected{% endif %}>Customers</option>
+                            <option value="seller" {% if current_role == 'seller' %}selected{% endif %}>Sellers</option>
+                            <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Admins</option>
+                        </select>
+                        <select name="status" class="form-select" style="width: auto;">
+                            <option value="all" {% if current_status == 'all' %}selected{% endif %}>All Status</option>
+                            <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </form>
+                </div>
+            </div>
+            <table class="table table-hover">
+                <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td><span class="badge bg-secondary">{{ user.role }}</span></td>
+                        <td><span class="badge bg-{% if user.is_active %}success{% else %}danger{% endif %}">{% if user.is_active %}Active{% else %}Inactive{% endif %}</span></td>
+                        <td>{{ user.created_at.strftime('%b %d, %Y') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                            <form method="POST" action="{{ url_for('admin.deactivate_user', user_id=user.id) }}" class="d-inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-{% if user.is_active %}danger{% else %}success{% endif %}">{% if user.is_active %}Deactivate{% else %}Activate{% endif %}</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Products - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Search</h5>
+                    <form method="GET" action="{{ url_for('auth.products') }}">
+                        <div class="input-group mb-3">
+                            <input type="text" name="q" class="form-control" placeholder="Search products..." value="{{ search }}">
+                            <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                        </div>
+                    </form>
+                    <h5>Categories</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="{{ url_for('auth.products') }}" class="list-group-item list-group-item-action {% if not current_category %}active{% endif %}">All Categories</a>
+                        {% for cat in categories %}
+                        <a href="{{ url_for('auth.products', category=cat.slug) }}" class="list-group-item list-group-item-action {% if current_category == cat.slug %}active{% endif %}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                    <h5 class="mt-3">Sort By</h5>
+                    <select class="form-select" onchange="window.location.href=this.value">
+                        <option value="{{ url_for('auth.products', category=current_category, q=search, sort='newest') }}" {% if sort == 'newest' %}selected{% endif %}>Newest</option>
+                        <option value="{{ url_for('auth.products', category=current_category, q=search, sort='price_low') }}" {% if sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="{{ url_for('auth.products', category=current_category, q=search, sort='price_high') }}" {% if sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="{{ url_for('auth.products', category=current_category, q=search, sort='rating') }}" {% if sort == 'rating' %}selected{% endif %}>Top Rated</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4>{% if search %}Results for "{{ search }}"{% else %}All Products{% endif %}</h4>
+                <span class="text-muted">{{ products.total }} products</span>
+            </div>
+            <div class="row g-3">
+                {% for product in products.items %}
+                <div class="col-6 col-md-4">
+                    {% include "components/product_card.html" %}
+                </div>
+                {% endfor %}
+            </div>
+            {% if products.pages > 1 %}
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% for page_num in products.iter_pages() %}
+                        {% if page_num %}
+                        <li class="page-item {% if page_num == products.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('auth.products', page=page_num, category=current_category, q=search, sort=sort) }}">{{ page_num }}</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

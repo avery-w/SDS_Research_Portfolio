@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Order {{ order.order_number }} - {{ platform_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Order {{ order.order_number }}</h2>
+        <span class="badge bg-{{ order.status|status_color }} fs-6">{{ status }}</span>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5>Items</h5>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Qty</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td>{{ item.product_name }}</td>
+                                <td>{{ item.product_price|currency }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.subtotal|currency }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Order Summary</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between"><span>Subtotal</span><span>{{ order.subtotal|currency }}</span></div>
+                    <div class="d-flex justify-content-between"><span>Shipping</span><span>{{ order.shipping_cost|currency }}</span></div>
+                    <div class="d-flex justify-content-between"><span>Tax</span><span>{{ order.tax_amount|currency }}</span></div>
+                    <hr>
+                    <div class="d-flex justify-content-between"><strong>Total</strong><strong>{{ order.total|currency }}</strong></div>
+                </div>
+            </div>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5>Shipping Address</h5>
+                    <p class="mb-0">
+                        {{ order.shipping_address }}<br>
+                        {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}
+                    </p>
+                    {% if order.tracking_number %}
+                    <p class="mt-2"><strong>Tracking:</strong> {{ order.tracking_number }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% if order.status in ['pending', 'processing'] %}
+            <form method="POST" action="{{ url_for('customer.cancel_order', order_number=order.order_number) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-outline-danger w-100">Cancel Order</button>
+            </form>
+            {% endif %}
+            {% if order.status == 'delivered' %}
+            <a href="{{ url_for('customer.request_return', order_number=order.order_number) }}" class="btn btn-outline-warning w-100">Request Return</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
