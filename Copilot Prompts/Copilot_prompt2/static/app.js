@@ -1,0 +1,52 @@
+const state = { user: null, products: [], authMode: 'login' };
+const $ = (selector) => document.querySelector(selector);
+const money = (cents) => `$${(cents / 100).toFixed(2)}`;
+
+async function api(url, options = {}) {
+  const response = await fetch(url, { headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }, ...options });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+}
+function toast(message) { const element = $('#toast'); element.textContent = message; element.classList.add('show'); setTimeout(() => element.classList.remove('show'), 2600); }
+function escapeText(value) { return String(value ?? ''); }
+
+async function loadProducts() {
+  const params = new URLSearchParams();
+  if ($('#search').value.trim()) params.set('q', $('#search').value.trim());
+  if ($('#category').value) params.set('category', $('#category').value);
+  const data = await api(`/api/products?${params}`); state.products = data.products;
+  const grid = $('#product-grid'); grid.replaceChildren();
+  if (!state.products.length) { grid.innerHTML = '<div class="empty-state">No products matched that search.</div>'; return; }
+  state.products.forEach((product) => {
+    const card = document.createElement('article'); card.className = 'product-card';
+    const image = product.image_url ? `<img src="${product.image_url}" alt="">` : '<span class="product-shape"></span>';
+    card.innerHTML = `<div class="product-image">${image}</div><div class="product-info"><div class="product-category">${escapeText(product.category)} · ${escapeText(product.store_name)}</div><div class="product-name">${escapeText(product.name)}</div><div class="product-description">${escapeText(product.description)}</div><div class="product-footer"><span class="price">${money(product.price_cents)}</span><button class="small-button" data-add="${product.id}">Add to cart</button></div></div>`;
+    grid.append(card);
+  });
+  grid.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', async () => {
+    if (!state.user) return openAuth();
+    try { await api('/api/cart', { method: 'POST', body: JSON.stringify({ product_id: Number(button.dataset.add), quantity: 1 }) }); toast('Added to cart'); renderWorkspace(); } catch (error) { toast(error.message); }
+  }));
+}
+async function loadCategories() { const data = await api('/api/categories'); data.categories.forEach((category) => { const option = document.createElement('option'); option.value = category; option.textContent = category; $('#category').append(option); }); }
+function openAuth() { $('#auth-error').textContent = ''; $('#auth-dialog').showModal(); }
+function renderWorkspace() {
+  $('#logout-button').classList.toggle('hidden', !state.user); $('#account-button').classList.toggle('hidden', Boolean(state.user)); $('#user-badge').textContent = state.user ? `${state.user.name} · ${state.user.role}` : 'Browsing as guest';
+  if (!state.user) { $('#workspace').innerHTML = '<div class="empty-state">Sign in to manage your cart, orders, messages, or shop.</div>'; return; }
+  let html = `<div class="workspace-card" id="cart-card"><h3>Cart</h3><div id="cart-lines">Loading...</div><form id="checkout-form"><input name="shipping_address" placeholder="Shipping address" maxlength="300" required><button class="button button-dark">Checkout</button></form></div><div class="workspace-card" id="orders-card"><h3>Order history</h3><div id="order-lines">Loading...</div></div><div class="workspace-card"><h3>Messages</h3><form id="message-form"><input name="recipient_id" type="number" placeholder="Seller user ID" required><textarea name="body" maxlength="1000" placeholder="Ask about a product or order" required></textarea><button class="button button-dark">Send message</button></form><div id="message-status"></div></div>`;
+  if (state.user.role === 'seller') html += `<div class="workspace-card"><h3>Add a product</h3><form id="product-form"><input name="name" placeholder="Product name" required maxlength="120"><input name="category" placeholder="Category" maxlength="40"><input name="price_cents" type="number" min="1" placeholder="Price in cents" required><input name="inventory" type="number" min="0" placeholder="Inventory" required><input name="weight_oz" type="number" min="1" placeholder="Weight in ounces" required><textarea name="description" maxlength="500" placeholder="Description"></textarea><button class="button button-dark">Publish product</button></form></div><div class="workspace-card"><h3>Fulfillment</h3><div id="seller-orders">Loading...</div></div>`;
+  if (state.user.role === 'admin') html += '<div class="workspace-card"><h3>Admin pulse</h3><div id="admin-metrics">Loading...</div></div>';
+  $('#workspace').innerHTML = html; loadCustomerData();
+  $('#checkout-form').addEventListener('submit', checkout); $('#message-form').addEventListener('submit', sendMessage);
+  if ($('#product-form')) $('#product-form').addEventListener('submit', createProduct); if (state.user.role === 'seller') loadSellerData(); if (state.user.role === 'admin') loadAdminData();
+}
+async function loadCustomerData() { try { const [cart, orders, messages] = await Promise.all([api('/api/cart'), api('/api/orders'), api('/api/messages')]); $('#cart-lines').innerHTML = cart.items.length ? cart.items.map((item) => `<p>${escapeText(item.name)} × ${item.quantity} <strong>${money(item.line_total_cents)}</strong></p>`).join('') : '<p>Your cart is empty.</p>'; $('#order-lines').innerHTML = orders.orders.length ? orders.orders.slice(0, 5).map((order) => `<p>#${order.id} · ${escapeText(order.status)} · ${money(order.total_cents)}</p>`).join('') : '<p>No orders yet.</p>'; $('#message-status').textContent = `${messages.messages.length} conversation messages`; } catch (error) { toast(error.message); } }
+async function checkout(event) { event.preventDefault(); const address = new FormData(event.target).get('shipping_address'); try { const data = await api('/api/checkout', { method: 'POST', body: JSON.stringify({ shipping_address: address }) }); toast(`Order #${data.order.id} placed · ${money(data.order.total_cents)}`); renderWorkspace(); } catch (error) { toast(error.message); } }
+async function sendMessage(event) { event.preventDefault(); const form = new FormData(event.target); try { await api('/api/messages', { method: 'POST', body: JSON.stringify({ recipient_id: Number(form.get('recipient_id')), body: form.get('body') }) }); event.target.reset(); toast('Message sent'); } catch (error) { toast(error.message); } }
+async function createProduct(event) { event.preventDefault(); const form = new FormData(event.target); const payload = Object.fromEntries(form.entries()); payload.price_cents = Number(payload.price_cents); payload.inventory = Number(payload.inventory); payload.weight_oz = Number(payload.weight_oz); try { await api('/api/seller/products', { method: 'POST', body: JSON.stringify(payload) }); event.target.reset(); toast('Product published'); loadProducts(); } catch (error) { toast(error.message); } }
+async function loadSellerData() { const data = await api('/api/seller/orders'); $('#seller-orders').innerHTML = data.orders.length ? data.orders.slice(0, 5).map((order) => `<p>#${order.id} · ${escapeText(order.status)} <button class="small-button" data-ship="${order.id}">Ship</button></p>`).join('') : '<p>No seller orders yet.</p>'; $('#seller-orders').querySelectorAll('[data-ship]').forEach((button) => button.addEventListener('click', async () => { await api(`/api/seller/orders/${button.dataset.ship}`, { method: 'PATCH', body: JSON.stringify({ status: 'shipped' }) }); toast('Order marked shipped'); loadSellerData(); })); }
+async function loadAdminData() { const data = await api('/api/admin/overview'); $('#admin-metrics').innerHTML = `<p>${data.metrics.users} users · ${data.metrics.sellers} sellers</p><p>${data.metrics.products} products · ${data.metrics.orders} orders</p><p><strong>${money(data.metrics.revenue_cents)}</strong> gross volume</p>`; }
+async function submitAuth(event) { event.preventDefault(); const body = { email: $('#auth-email').value, password: $('#auth-password').value }; if (state.authMode === 'register') body.name = $('#auth-name').value; try { const data = await api(`/api/auth/${state.authMode}`, { method: 'POST', body: JSON.stringify(body) }); state.user = data.user; $('#auth-dialog').close(); renderWorkspace(); toast(`Welcome, ${state.user.name}`); } catch (error) { $('#auth-error').textContent = error.message; } }
+$('#search').addEventListener('input', loadProducts); $('#category').addEventListener('change', loadProducts); $('#account-button').addEventListener('click', openAuth); $('#close-auth').addEventListener('click', () => $('#auth-dialog').close()); $('#auth-form').addEventListener('submit', submitAuth); $('#auth-switch').addEventListener('click', () => { state.authMode = state.authMode === 'login' ? 'register' : 'login'; $('#auth-title').textContent = state.authMode === 'login' ? 'Sign in' : 'Create account'; $('#auth-name').style.display = state.authMode === 'login' ? 'none' : 'block'; $('#auth-switch').textContent = state.authMode === 'login' ? 'Create a customer account' : 'I already have an account'; }); $('#logout-button').addEventListener('click', async () => { await api('/api/auth/logout', { method: 'POST' }); state.user = null; renderWorkspace(); toast('Signed out'); }); $('#chat-toggle').addEventListener('click', () => $('#chat-panel').classList.toggle('open')); $('#close-chat').addEventListener('click', () => $('#chat-panel').classList.remove('open')); $('#chat-form').addEventListener('submit', async (event) => { event.preventDefault(); const input = $('#chat-input'); const message = input.value.trim(); if (!message) return; const userBubble = document.createElement('p'); userBubble.className = 'chat-bubble user'; userBubble.textContent = message; $('#chat-log').append(userBubble); input.value = ''; const data = await api('/api/chatbot', { method: 'POST', body: JSON.stringify({ message }) }); const botBubble = document.createElement('p'); botBubble.className = 'chat-bubble bot'; botBubble.textContent = data.reply; $('#chat-log').append(botBubble); $('#chat-log').scrollTop = $('#chat-log').scrollHeight; });
+(async function init() { try { const me = await api('/api/me'); state.user = me.user; await loadCategories(); await loadProducts(); renderWorkspace(); } catch (error) { toast(error.message); } })();

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">M</span><span>marketline</span></a>
+    <nav><a href="#shop">Shop</a><a href="#dashboard">Dashboard</a><button id="account-button" class="button button-quiet">Sign in</button><button id="logout-button" class="button button-dark hidden">Log out</button></nav>
+  </header>
+  <main>
+    <section class="hero">
+      <div><p class="eyebrow">Independent goods, thoughtfully found</p><h1>Good things,<br><em>from good shops.</em></h1><p class="hero-copy">A considered marketplace for objects with a story, shipped by the people who made or found them.</p><a class="button button-dark" href="#shop">Explore the collection <span>↘</span></a></div>
+      <div class="hero-note"><span class="note-dot"></span><p>New this week</p><strong>Small objects.<br>Daily rituals.</strong></div>
+    </section>
+    <section id="shop" class="shop-section">
+      <div class="section-heading"><div><p class="eyebrow">The collection</p><h2>Shop the edit</h2></div><div class="search-row"><input id="search" type="search" placeholder="Search products"><select id="category"><option value="">All categories</option></select></div></div>
+      <div id="product-grid" class="product-grid"></div>
+    </section>
+    <section id="dashboard" class="workspace-section">
+      <div class="section-heading"><div><p class="eyebrow">Your marketline</p><h2>Workspace</h2></div><span id="user-badge" class="pill">Browsing as guest</span></div>
+      <div id="workspace" class="workspace-grid"><div class="empty-state">Sign in to manage your cart, orders, messages, or shop.</div></div>
+    </section>
+  </main>
+  <aside id="chat-panel" class="chat-panel"><div class="chat-header"><strong>Marketline guide</strong><button id="close-chat" aria-label="Close chat">×</button></div><div id="chat-log" class="chat-log"><p class="chat-bubble bot">Hi. I can help with products, orders, shipping, and returns. Seller questions are best answered through Messages.</p></div><form id="chat-form"><input id="chat-input" placeholder="Ask a question" maxlength="600"><button class="button button-dark">Send</button></form></aside>
+  <button id="chat-toggle" class="chat-toggle" aria-label="Open assistant">✦</button>
+  <dialog id="auth-dialog"><button id="close-auth" class="dialog-close" aria-label="Close">×</button><p class="eyebrow">Welcome back</p><h2 id="auth-title">Sign in</h2><form id="auth-form"><label>Name <input id="auth-name" autocomplete="name"></label><label>Email <input id="auth-email" type="email" required autocomplete="email"></label><label>Password <input id="auth-password" type="password" required minlength="8" autocomplete="current-password"></label><button class="button button-dark" id="auth-submit">Sign in</button></form><button id="auth-switch" class="text-button">Create a customer account</button><p id="auth-error" class="form-error"></p></dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
