@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or 'Northstar Market' }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('home') }}"><span class="brand-mark">N</span><span>northstar</span></a>
+    <nav class="nav-links">
+      <a href="{{ url_for('home') }}">Discover</a>
+      {% if user %}<a href="{{ url_for('dashboard') }}">Workspace</a><button class="link-button" data-logout>Sign out</button>{% else %}<button class="button button-small" data-open-auth>Sign in</button>{% endif %}
+    </nav>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <div class="toast" id="toast" role="status"></div>
+  <dialog id="auth-dialog" class="modal">
+    <button class="modal-close" data-close-auth aria-label="Close">&times;</button>
+    <div class="auth-layout">
+      <div><p class="eyebrow">Welcome back</p><h2>Find your next favorite thing.</h2><p class="muted">A considered marketplace for independent sellers and curious customers.</p></div>
+      <form id="login-form" class="stack-form"><label>Email<input name="email" type="email" value="customer@example.com" required></label><label>Password<input name="password" type="password" value="customer" required></label><button class="button" type="submit">Sign in</button><p class="form-note">Demo accounts: customer@example.com / customer, seller@example.com / seller, admin@example.com / admin</p></form>
+    </div>
+  </dialog>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
