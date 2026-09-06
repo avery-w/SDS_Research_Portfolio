@@ -1,0 +1,20 @@
+services:
+  marketplace:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - uploads:/app/uploads
+    restart: unless-stopped
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: marketplace
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: change-this-in-production
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  uploads:
+  postgres_data:

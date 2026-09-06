@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MarketSquare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">MarketSquare <span>local commerce, thoughtfully built</span></a>
+    <div class="session-actions"><button id="login-button" class="button ghost">Sign in</button><button id="logout-button" class="button ghost hidden">Sign out</button></div>
+  </header>
+  <main>
+    <section class="hero"><div><p class="eyebrow">Independent sellers · Austin origin</p><h1>Find things worth bringing home.</h1><p class="lede">A calmer marketplace for useful objects, small businesses, and direct conversations.</p></div><div class="hero-note"><strong>Need a hand?</strong><br>Ask the guide about shipping, returns, or checkout.</div></section>
+    <section class="toolbar"><label class="search"><span>Search the market</span><input id="search" type="search" placeholder="Ceramics, coffee, vintage..." autocomplete="off"></label><button id="cart-button" class="button dark">Cart <span id="cart-count">0</span></button></section>
+    <div id="notice" class="notice" role="status"></div>
+    <section id="products" class="product-grid" aria-live="polite"></section>
+    <section class="split-panels"><article class="panel chatbot"><div class="panel-heading"><div><p class="eyebrow">MarketSquare guide</p><h2>Questions, answered.</h2></div><span class="status-dot"></span></div><div id="chat-log" class="chat-log"><p class="bot">Ask about shipping, returns, or how to contact a seller.</p></div><form id="chat-form" class="inline-form"><input id="chat-message" placeholder="What can I help with?" maxlength="1000" required><button class="button dark" aria-label="Send message">Send</button></form></article><article class="panel seller-callout"><p class="eyebrow">A better line of support</p><h2>Talk to the person who made it.</h2><p>Product details live with the seller. From every product, you can open a direct conversation instead of searching through a help center.</p></article></section>
+  </main>
+  <dialog id="auth-dialog"><form method="dialog" id="auth-form"><button class="close" value="cancel" aria-label="Close">×</button><p class="eyebrow">Your account</p><h2 id="auth-title">Sign in</h2><input id="auth-name" class="auth-seller-only hidden" placeholder="Name"><input id="auth-email" type="email" placeholder="Email" required><input id="auth-password" type="password" minlength="12" placeholder="Password (12+ characters)" required><select id="auth-role" class="auth-seller-only hidden"><option value="customer">Customer</option><option value="seller">Seller</option></select><button id="auth-submit" class="button dark" value="submit">Sign in</button><button id="auth-switch" class="link-button" type="button">Create a seller or customer account</button></form></dialog>
+  <dialog id="cart-dialog"><div class="dialog-heading"><div><p class="eyebrow">Your basket</p><h2>Ready when you are.</h2></div><button class="close" onclick="document.getElementById('cart-dialog').close()">×</button></div><div id="cart-items"></div><form id="checkout-form"><textarea id="shipping-address" required placeholder="Shipping address"></textarea><button class="button dark" type="submit">Checkout</button></form></dialog>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
