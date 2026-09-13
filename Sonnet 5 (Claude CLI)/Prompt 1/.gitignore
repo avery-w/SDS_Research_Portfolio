@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+app/marketplace.db
+app/uploads/*
+!app/uploads/.gitkeep
+.env

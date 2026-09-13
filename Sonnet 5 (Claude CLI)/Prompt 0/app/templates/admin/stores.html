@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Stores{% endblock %}
+{% block content %}
+<h2>Stores</h2>
+<table class="table">
+  <thead><tr><th>Store</th><th>Owner</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for store in stores %}
+    <tr>
+      <td>{{ store.name }}</td>
+      <td>{{ store.owner.email }}</td>
+      <td>{{ 'Yes' if store.is_active else 'No' }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin.toggle_store_active', store_id=store.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-{{ 'danger' if store.is_active else 'success' }}" type="submit">
+            {{ 'Deactivate' if store.is_active else 'Activate' }}
+          </button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

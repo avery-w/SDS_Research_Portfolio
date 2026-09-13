@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="mb-3 d-flex" method="get">
+  <input class="form-control me-2" name="q" value="{{ q }}" placeholder="Search products...">
+  <button class="btn btn-outline-primary">Search</button>
+</form>
+<div class="row row-cols-1 row-cols-md-3 g-3">
+  {% for p in products %}
+  <div class="col">
+    <div class="card h-100">
+      {% if p.images %}
+      <img src="{{ url_for('static', filename='uploads/' + p.images[0].filename) }}" class="card-img-top" style="height:180px;object-fit:cover;">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ p.name }}</h5>
+        <p class="card-text">${{ '%.2f'|format(p.price) }} &middot; {{ p.store.name }}</p>
+        <a class="btn btn-sm btn-primary" href="{{ url_for('customer.product_detail', product_id=p.id) }}">View</a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p>No products found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

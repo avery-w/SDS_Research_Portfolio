@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}All Orders{% endblock %}
+{% block content %}
+<h2>All Orders</h2>
+<table class="table">
+  <thead><tr><th>Order #</th><th>Customer</th><th>Item</th><th>Status</th><th>Override</th></tr></thead>
+  <tbody>
+  {% for order in orders %}
+    {% for item in order.items %}
+      <tr>
+        <td>{{ order.id }}</td>
+        <td>{{ order.customer.email }}</td>
+        <td>{{ item.product.name }} x{{ item.quantity }}</td>
+        <td><span class="badge bg-secondary">{{ item.status }}</span></td>
+        <td>
+          <form method="post" action="{{ url_for('admin.override_item_status', item_id=item.id) }}" class="d-flex gap-1">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="status" class="form-select form-select-sm">
+              {% for s in ['pending','shipped','delivered','cancelled','return_requested','returned'] %}
+                <option value="{{ s }}" {% if s == item.status %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-sm btn-outline-primary" type="submit">Set</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

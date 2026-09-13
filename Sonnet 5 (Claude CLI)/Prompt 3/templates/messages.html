@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Message {{ store.name }}{% endblock %}
+{% block content %}
+<h1 class="mb-4">Message {{ store.name }}</h1>
+<div class="border rounded p-3 mb-3" style="max-height:400px;overflow-y:auto">
+  {% for m in messages %}
+  <div class="mb-2 {% if m.sender_role == 'customer' %}text-end{% endif %}">
+    <span class="badge {% if m.sender_role == 'customer' %}text-bg-primary{% else %}text-bg-secondary{% endif %}">{{ m.sender_role }}</span>
+    <div>{{ m.content }}</div>
+  </div>
+  {% else %}
+  <p class="text-muted">No messages yet. Ask the seller anything about their products or your order.</p>
+  {% endfor %}
+</div>
+<form method="post" action="/messages/{{ store.id }}" class="d-flex gap-2">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input type="text" name="content" class="form-control" placeholder="Type a message..." required maxlength="4000">
+  <button class="btn btn-primary" type="submit">Send</button>
+</form>
+{% endblock %}

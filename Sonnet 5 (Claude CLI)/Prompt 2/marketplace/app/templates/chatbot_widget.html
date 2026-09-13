@@ -1,0 +1,37 @@
+<div id="chatbot-box" class="card shadow">
+  <div class="card-header py-1 px-2">Ask a question</div>
+  <div id="chatbot-log" class="card-body py-2 px-2"></div>
+  <div class="card-footer p-1">
+    <form id="chatbot-form" class="d-flex">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input id="chatbot-input" class="form-control form-control-sm" placeholder="Shipping, returns, order status...">
+      <button class="btn btn-sm btn-primary ms-1" type="submit">Send</button>
+    </form>
+  </div>
+</div>
+<script>
+document.getElementById('chatbot-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const input = document.getElementById('chatbot-input');
+  const log = document.getElementById('chatbot-log');
+  const text = input.value.trim();
+  if (!text) return;
+  appendLine('chat-msg-user', text);
+  input.value = '';
+  const resp = await fetch('/api/chatbot/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text })
+  });
+  const data = await resp.json();
+  appendLine('chat-msg-bot', data.reply || data.error);
+  log.scrollTop = log.scrollHeight;
+
+  function appendLine(cls, msg) {
+    const div = document.createElement('div');
+    div.className = cls;
+    div.textContent = msg; // textContent, not innerHTML: never render chat text as HTML
+    log.appendChild(div);
+  }
+});
+</script>

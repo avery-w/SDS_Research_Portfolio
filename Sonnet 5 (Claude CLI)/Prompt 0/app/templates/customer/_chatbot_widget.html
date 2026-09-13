@@ -1,0 +1,54 @@
+<div id="chatbot-widget" style="position:fixed;bottom:20px;right:20px;z-index:1050;">
+  <button id="chatbot-toggle" class="btn btn-primary rounded-circle shadow" style="width:56px;height:56px;">💬</button>
+  <div id="chatbot-panel" class="card shadow" style="display:none;width:320px;height:420px;position:absolute;bottom:64px;right:0;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Shopping Assistant</span>
+      <button id="chatbot-close" class="btn-close"></button>
+    </div>
+    <div id="chatbot-messages" class="card-body" style="overflow-y:auto;font-size:0.9rem;"></div>
+    <div class="card-footer p-2">
+      <form id="chatbot-form" class="d-flex gap-1">
+        <input type="text" id="chatbot-input" class="form-control form-control-sm" placeholder="Ask a question..." autocomplete="off">
+        <button class="btn btn-sm btn-primary" type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const toggle = document.getElementById('chatbot-toggle');
+  const panel = document.getElementById('chatbot-panel');
+  const closeBtn = document.getElementById('chatbot-close');
+  const form = document.getElementById('chatbot-form');
+  const input = document.getElementById('chatbot-input');
+  const messages = document.getElementById('chatbot-messages');
+
+  toggle.addEventListener('click', () => panel.style.display = panel.style.display === 'none' ? 'block' : 'none');
+  closeBtn.addEventListener('click', () => panel.style.display = 'none');
+
+  function addMessage(text, who) {
+    const div = document.createElement('div');
+    div.className = 'mb-2 ' + (who === 'user' ? 'text-end' : '');
+    div.innerHTML = `<span class="badge ${who === 'user' ? 'bg-primary' : 'bg-secondary'}">${text}</span>`;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  addMessage("Hi! I can help with general shopping questions. For anything specific to a product or order, use the Message Seller button.", 'bot');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    addMessage(text, 'user');
+    input.value = '';
+    const resp = await fetch("{{ url_for('api.chatbot') }}", {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({message: text}),
+    });
+    const data = await resp.json();
+    addMessage(data.reply || data.error || "Sorry, something went wrong.", 'bot');
+  });
+})();
+</script>

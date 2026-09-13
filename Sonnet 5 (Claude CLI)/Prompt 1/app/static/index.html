@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Marketplace</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand" onclick="go('browse')">Marketplace</div>
+    <div class="search-box">
+      <input id="search-input" placeholder="Search products..." onkeydown="if(event.key==='Enter') doSearch()" />
+    </div>
+    <nav id="main-nav"></nav>
+    <div class="account-area" id="account-area"></div>
+  </header>
+
+  <main>
+    <!-- BROWSE -->
+    <section class="view" id="view-browse">
+      <div class="form-inline" style="margin-bottom:16px;">
+        <select id="category-filter" onchange="loadProducts()">
+          <option value="">All categories</option>
+        </select>
+      </div>
+      <div class="grid" id="product-grid"></div>
+    </section>
+
+    <!-- PRODUCT DETAIL -->
+    <section class="view" id="view-product">
+      <div id="product-detail"></div>
+    </section>
+
+    <!-- LOGIN / REGISTER -->
+    <section class="view" id="view-auth">
+      <div class="card" style="max-width:420px;margin:0 auto;">
+        <div class="tabs">
+          <button id="tab-login" class="active" onclick="setAuthTab('login')">Log in</button>
+          <button id="tab-register" onclick="setAuthTab('register')">Sign up</button>
+        </div>
+        <form id="login-form" onsubmit="return submitLogin(event)">
+          <div class="form-row"><label>Email</label><input type="email" id="login-email" required /></div>
+          <div class="form-row"><label>Password</label><input type="password" id="login-password" required /></div>
+          <button type="submit">Log in</button>
+          <p class="error" id="login-error"></p>
+        </form>
+        <form id="register-form" style="display:none" onsubmit="return submitRegister(event)">
+          <div class="form-row"><label>Name</label><input id="reg-name" required /></div>
+          <div class="form-row"><label>Email</label><input type="email" id="reg-email" required /></div>
+          <div class="form-row"><label>Password (min 8 chars)</label><input type="password" id="reg-password" minlength="8" required /></div>
+          <div class="form-row">
+            <label>Account type</label>
+            <select id="reg-role"><option value="customer">Customer</option><option value="seller">Seller</option></select>
+          </div>
+          <button type="submit">Create account</button>
+          <p class="error" id="register-error"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- CART -->
+    <section class="view" id="view-cart">
+      <h2>Your Cart</h2>
+      <div id="cart-items"></div>
+      <div class="card" id="cart-summary" style="max-width:320px;"></div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section class="view" id="view-checkout">
+      <h2>Checkout</h2>
+      <div class="card" style="max-width:480px;">
+        <div class="form-row"><label>Full name</label><input id="ship-name" required /></div>
+        <div class="form-row"><label>Street address</label><input id="ship-street" required /></div>
+        <div class="form-inline">
+          <div class="form-row"><label>City</label><input id="ship-city" required /></div>
+          <div class="form-row"><label>State</label><input id="ship-state" maxlength="2" style="width:60px" required /></div>
+          <div class="form-row"><label>Zip</label><input id="ship-zip" required /></div>
+        </div>
+        <button class="secondary" onclick="getShippingQuotes()">Get shipping rates</button>
+        <div id="shipping-options" style="margin:12px 0;"></div>
+        <div id="checkout-total" class="muted"></div>
+        <button onclick="submitCheckout()" id="place-order-btn" disabled>Place order</button>
+        <p class="error" id="checkout-error"></p>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="view" id="view-orders">
+      <h2>Order History</h2>
+      <div id="orders-list"></div>
+    </section>
+
+    <!-- MESSAGES -->
+    <section class="view" id="view-messages">
+      <h2>Messages</h2>
+      <div class="card">
+        <div class="form-inline">
+          <div class="form-row"><label>To (user id)</label><input id="msg-recipient" type="number" style="width:100px" /></div>
+          <div class="form-row"><label>Message</label><input id="msg-body" style="width:300px" /></div>
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+      <div id="messages-list"></div>
+    </section>
+
+    <!-- SELLER DASHBOARD -->
+    <section class="view" id="view-seller">
+      <h2>Seller Dashboard</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setSellerTab('store')">Store</button>
+        <button class="tab-btn" onclick="setSellerTab('products')">Products</button>
+        <button class="tab-btn" onclick="setSellerTab('orders')">Orders</button>
+        <button class="tab-btn" onclick="setSellerTab('returns')">Returns</button>
+      </div>
+      <div id="seller-store" class="seller-tab"></div>
+      <div id="seller-products" class="seller-tab" style="display:none"></div>
+      <div id="seller-orders" class="seller-tab" style="display:none"></div>
+      <div id="seller-returns" class="seller-tab" style="display:none"></div>
+    </section>
+
+    <!-- ADMIN DASHBOARD -->
+    <section class="view" id="view-admin">
+      <h2>Admin Dashboard</h2>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="setAdminTab('analytics')">Analytics</button>
+        <button class="tab-btn" onclick="setAdminTab('users')">Users</button>
+        <button class="tab-btn" onclick="setAdminTab('stores')">Stores</button>
+        <button class="tab-btn" onclick="setAdminTab('products')">Products</button>
+        <button class="tab-btn" onclick="setAdminTab('orders')">Orders</button>
+        <button class="tab-btn" onclick="setAdminTab('settings')">Settings</button>
+      </div>
+      <div id="admin-analytics" class="admin-tab"></div>
+      <div id="admin-users" class="admin-tab" style="display:none"></div>
+      <div id="admin-stores" class="admin-tab" style="display:none"></div>
+      <div id="admin-products" class="admin-tab" style="display:none"></div>
+      <div id="admin-orders" class="admin-tab" style="display:none"></div>
+      <div id="admin-settings" class="admin-tab" style="display:none"></div>
+    </section>
+  </main>
+
+  <button id="chat-toggle" onclick="toggleChat()" title="Chat with our assistant">💬</button>
+  <div id="chat-panel">
+    <div class="chat-header">Shopping Assistant</div>
+    <div id="chat-log"></div>
+    <form onsubmit="return sendChat(event)">
+      <input id="chat-input" placeholder="Ask a question..." autocomplete="off" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

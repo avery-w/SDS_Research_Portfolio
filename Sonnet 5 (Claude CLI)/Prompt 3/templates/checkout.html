@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h1 class="mb-4">Checkout</h1>
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+<div class="row">
+  <div class="col-md-7">
+    <h5>Shipping address</h5>
+    <form method="post" action="/checkout/rates">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <div class="mb-2"><input class="form-control" name="shipping_name" placeholder="Full name" value="{{ address.shipping_name if address else '' }}" required></div>
+      <div class="mb-2"><input class="form-control" name="shipping_address1" placeholder="Street address" value="{{ address.shipping_address1 if address else '' }}" required></div>
+      <div class="row g-2 mb-2">
+        <div class="col"><input class="form-control" name="shipping_city" placeholder="City" value="{{ address.shipping_city if address else '' }}" required></div>
+        <div class="col-3"><input class="form-control" name="shipping_state" placeholder="TX" maxlength="2" value="{{ address.shipping_state if address else '' }}" required></div>
+        <div class="col-3"><input class="form-control" name="shipping_zip" placeholder="ZIP" value="{{ address.shipping_zip if address else '' }}" required></div>
+      </div>
+      <button class="btn btn-outline-primary" type="submit">Get shipping rates</button>
+    </form>
+
+    {% if rates %}
+    <form method="post" action="/checkout/place" class="mt-4">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <input type="hidden" name="shipping_name" value="{{ address.shipping_name }}">
+      <input type="hidden" name="shipping_address1" value="{{ address.shipping_address1 }}">
+      <input type="hidden" name="shipping_city" value="{{ address.shipping_city }}">
+      <input type="hidden" name="shipping_state" value="{{ address.shipping_state }}">
+      <input type="hidden" name="shipping_zip" value="{{ address.shipping_zip }}">
+      <h5>Choose a shipping method</h5>
+      {% for r in rates %}
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="ups_service_code" id="rate-{{ r.code }}" value="{{ r.code }}" {% if loop.first %}checked{% endif %}>
+        <label class="form-check-label" for="rate-{{ r.code }}">{{ r.name }} &mdash; ${{ "%.2f"|format(r.cost_cents / 100) }}</label>
+      </div>
+      {% endfor %}
+      <button class="btn btn-primary mt-3" type="submit">Place order</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="col-md-5">
+    <h5>Order summary</h5>
+    <ul class="list-group mb-3">
+      {% for item in items %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ item.product.name }} &times; {{ item.quantity }}</span>
+        <span>${{ "%.2f"|format(item.quantity * item.product.price_cents / 100) }}</span>
+      </li>
+      {% endfor %}
+      <li class="list-group-item d-flex justify-content-between fw-bold">
+        <span>Subtotal</span><span>${{ "%.2f"|format(subtotal_cents / 100) }}</span>
+      </li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

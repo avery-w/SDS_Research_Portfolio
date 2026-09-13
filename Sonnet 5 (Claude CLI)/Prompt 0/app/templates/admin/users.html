@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<h2>Users</h2>
+<table class="table">
+  <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for user in users %}
+    <tr>
+      <td>{{ user.name }}</td>
+      <td>{{ user.email }}</td>
+      <td>{{ user.role }}</td>
+      <td>{{ 'Yes' if user.is_active_user else 'No' }}</td>
+      <td>
+        {% if user.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.toggle_user_active', user_id=user.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-{{ 'danger' if user.is_active_user else 'success' }}" type="submit">
+              {{ 'Deactivate' if user.is_active_user else 'Activate' }}
+            </button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

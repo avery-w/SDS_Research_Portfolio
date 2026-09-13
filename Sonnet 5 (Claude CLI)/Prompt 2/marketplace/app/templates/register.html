@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Register</h2>
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input class="form-control mb-2" name="name" placeholder="Full name" required>
+  <input class="form-control mb-2" name="email" type="email" placeholder="Email" required>
+  <input class="form-control mb-2" name="password" type="password" placeholder="Password (min 8 chars)" required>
+  <select class="form-select mb-2" name="role">
+    <option value="customer">Customer</option>
+    <option value="seller">Seller</option>
+  </select>
+  <button class="btn btn-primary">Register</button>
+</form>
+{% endblock %}

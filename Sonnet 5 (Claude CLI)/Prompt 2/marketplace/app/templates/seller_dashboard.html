@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ store.name }}</h2>
+<a class="btn btn-primary mb-3" href="{{ url_for('seller.product_new') }}">+ New Product</a>
+
+<h4>Products</h4>
+<table class="table">
+  <tr><th>Name</th><th>Price</th><th>Stock</th><th>Active</th><th></th></tr>
+  {% for p in products %}
+  <tr>
+    <td>{{ p.name }}</td>
+    <td>${{ '%.2f'|format(p.price) }}</td>
+    <td>{{ p.stock_qty }}</td>
+    <td>{{ 'yes' if p.is_active else 'no' }}</td>
+    <td><a href="{{ url_for('seller.product_edit', product_id=p.id) }}">Edit</a></td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h4>Orders</h4>
+<table class="table">
+  <tr><th>Order</th><th>Product</th><th>Qty</th><th>Status</th><th></th></tr>
+  {% for i in order_items %}
+  <tr>
+    <td>{{ i.order_id }}</td>
+    <td>{{ i.product.name }}</td>
+    <td>{{ i.quantity }}</td>
+    <td>{{ i.item_status }}</td>
+    <td>
+      {% if i.item_status == 'return_requested' %}
+      <form method="post" action="{{ url_for('seller.fulfill_item', item_id=i.id) }}" class="d-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="status" value="returned">
+        <button class="btn btn-sm btn-outline-success">Approve Return</button>
+      </form>
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h4>Messages from Customers</h4>
+<ul class="list-group">
+  {% for m in messages %}
+  <li class="list-group-item"><strong>{{ m.sender.name }}:</strong> {{ m.body }}</li>
+  {% endfor %}
+</ul>
+{% endblock %}

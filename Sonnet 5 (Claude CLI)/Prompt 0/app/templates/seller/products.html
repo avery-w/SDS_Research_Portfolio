@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Products{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>My Products</h2>
+  <a href="{{ url_for('seller.product_new') }}" class="btn btn-primary">Add Product</a>
+</div>
+<table class="table">
+  <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+  {% for product in products %}
+    <tr>
+      <td>{{ product.name }}</td>
+      <td>${{ "%.2f"|format(product.price) }}</td>
+      <td>{{ product.stock_qty }}</td>
+      <td>{{ 'Yes' if product.is_active else 'No' }}</td>
+      <td>
+        <a href="{{ url_for('seller.product_edit', product_id=product.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <form method="post" action="{{ url_for('seller.product_delete', product_id=product.id) }}" class="d-inline" onsubmit="return confirm('Delete this product?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5">No products yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

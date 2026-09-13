@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}My account{% endblock %}
+{% block content %}
+<h1 class="mb-4">My account</h1>
+<p><strong>Name:</strong> {{ user.full_name }}</p>
+<p><strong>Email:</strong> {{ user.email }}</p>
+<p><strong>Role:</strong> {{ user.role.value }}</p>
+<a href="/orders" class="btn btn-outline-primary">View order history</a>
+{% endblock %}

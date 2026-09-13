@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Users</h2>
+<table class="table">
+  <tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th></th></tr>
+  {% for u in users %}
+  <tr>
+    <td>{{ u.name }}</td>
+    <td>{{ u.email }}</td>
+    <td>{{ u.role }}</td>
+    <td>{{ 'yes' if u.is_active_account else 'no' }}</td>
+    <td>
+      <form method="post" action="{{ url_for('admin.toggle_user_active', user_id=u.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-danger">{{ 'Deactivate' if u.is_active_account else 'Reactivate' }}</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

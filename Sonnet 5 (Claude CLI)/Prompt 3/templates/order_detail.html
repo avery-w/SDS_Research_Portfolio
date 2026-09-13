@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<h1 class="mb-4">Order #{{ order.id }}</h1>
+<p>Status: <span class="badge text-bg-info">{{ order.status.value }}</span></p>
+<p>Shipping to: {{ order.shipping_name }}, {{ order.shipping_address1 }}, {{ order.shipping_city }}, {{ order.shipping_state }} {{ order.shipping_zip }}</p>
+
+<table class="table">
+  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Fulfilled</th><th></th></tr></thead>
+  <tbody>
+    {% for item in order.items %}
+    <tr>
+      <td>{{ item.product.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ "%.2f"|format(item.unit_price_cents / 100) }}</td>
+      <td>{{ "Yes" if item.fulfilled else "No" }}</td>
+      <td>
+        {% if not item.return_request %}
+        <form method="post" action="/order-items/{{ item.id }}/return" class="d-flex gap-1">
+          <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+          <input type="text" name="reason" class="form-control form-control-sm" placeholder="Return reason" required>
+          <button class="btn btn-sm btn-outline-secondary" type="submit">Request return</button>
+        </form>
+        {% else %}
+        <span class="badge text-bg-secondary">Return {{ item.return_request.status.value }}</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<p>Subtotal: ${{ "%.2f"|format(order.subtotal_cents / 100) }}<br>
+Shipping ({{ order.ups_service_code }}): ${{ "%.2f"|format(order.shipping_cents / 100) }}<br>
+<strong>Total: ${{ "%.2f"|format(order.total_cents / 100) }}</strong></p>
+
+{% if order.status.value in ('pending_payment', 'paid') %}
+<form method="post" action="/orders/{{ order.id }}/cancel">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <button class="btn btn-outline-danger" type="submit">Cancel order</button>
+</form>
+{% endif %}
+{% endblock %}

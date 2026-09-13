@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Order History</h2>
+<table class="table">
+  <tr><th>#</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr>
+  {% for o in orders %}
+  <tr>
+    <td>{{ o.id }}</td>
+    <td>{{ o.created_at.strftime('%Y-%m-%d') }}</td>
+    <td>{{ o.status }}</td>
+    <td>${{ '%.2f'|format(o.total) }}</td>
+    <td><a href="{{ url_for('customer.order_detail', order_id=o.id) }}">View</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

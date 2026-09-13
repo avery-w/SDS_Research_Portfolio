@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Platform settings{% endblock %}
+{% block content %}
+<h1 class="mb-4">Platform settings</h1>
+<table class="table">
+  <thead><tr><th>Key</th><th>Value</th></tr></thead>
+  <tbody>
+    {% for row in settings_rows %}
+    <tr><td>{{ row.key }}</td><td>{{ row.value }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h5>Set a value</h5>
+<form method="post" action="/admin/settings" class="d-flex gap-2">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input class="form-control" name="key" placeholder="key" required>
+  <input class="form-control" name="value" placeholder="value" required>
+  <button class="btn btn-primary" type="submit">Save</button>
+</form>
+{% endblock %}

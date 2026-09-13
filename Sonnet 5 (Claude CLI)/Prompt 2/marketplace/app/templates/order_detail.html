@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Order #{{ order.id }} &mdash; {{ order.status }}</h2>
+<p>Shipping to: {{ order.ship_name }}, {{ order.ship_line1 }}, {{ order.ship_city }}, {{ order.ship_state }} {{ order.ship_zip }}</p>
+<table class="table">
+  <tr><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th></th></tr>
+  {% for i in order.items %}
+  <tr>
+    <td>{{ i.product.name }}</td>
+    <td>{{ i.quantity }}</td>
+    <td>${{ '%.2f'|format(i.price_cents_at_purchase/100) }}</td>
+    <td>{{ i.item_status }}</td>
+    <td>
+      {% if i.item_status == 'fulfilled' %}
+      <form method="post" action="{{ url_for('customer.request_return', order_id=order.id, item_id=i.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-warning">Request Return</button>
+      </form>
+      {% endif %}
+      <form method="post" action="{{ url_for('customer.message_seller', seller_id=i.store.seller_id) }}" class="mt-1">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="order_id" value="{{ order.id }}">
+        <input type="hidden" name="product_id" value="{{ i.product.id }}">
+        <input type="text" name="body" class="form-control form-control-sm" placeholder="Message seller about this item">
+        <button class="btn btn-sm btn-outline-secondary mt-1">Send</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<p>Subtotal: ${{ '%.2f'|format(order.subtotal_cents/100) }} + Shipping: ${{ '%.2f'|format(order.shipping_cost_cents/100) }} = <strong>${{ '%.2f'|format(order.total) }}</strong></p>
+{% if order.status in ('pending', 'paid') %}
+<form method="post" action="{{ url_for('customer.order_cancel', order_id=order.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-danger">Cancel Order</button>
+</form>
+{% endif %}
+{% endblock %}

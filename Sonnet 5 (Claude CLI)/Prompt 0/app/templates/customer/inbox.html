@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h2>Messages</h2>
+<table class="table">
+  <thead><tr><th>With</th><th>Message</th><th>Date</th></tr></thead>
+  <tbody>
+  {% for m in threads %}
+    <tr>
+      <td>{{ m.sender.name if m.sender_id != current_user.id else m.recipient.name }}</td>
+      <td>{{ m.body }}</td>
+      <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">No messages yet. Ask a question from a product or order page.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    {% if product.primary_image %}
+      <img src="{{ url_for('static', filename='uploads/' + product.primary_image.filename) }}" class="img-fluid rounded">
+    {% else %}
+      <div class="bg-light d-flex align-items-center justify-content-center" style="height:300px;">No image</div>
+    {% endif %}
+    <div class="d-flex gap-2 mt-2">
+      {% for img in product.images %}
+        <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" style="height:60px;">
+      {% endfor %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <h2>{{ product.name }}</h2>
+    <p class="text-muted">Sold by {{ product.store.name }}</p>
+    <h4>${{ "%.2f"|format(product.price) }}</h4>
+    <p>{{ product.description }}</p>
+    <p>{% if product.stock_qty > 0 %}<span class="badge bg-success">In stock ({{ product.stock_qty }})</span>{% else %}<span class="badge bg-danger">Out of stock</span>{% endif %}</p>
+
+    {% if current_user.is_authenticated and current_user.is_customer() %}
+      <form method="post" action="{{ url_for('customer.cart_add', product_id=product.id) }}" class="d-flex gap-2 mb-4">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock_qty }}" class="form-control" style="width:100px;" {% if product.stock_qty == 0 %}disabled{% endif %}>
+        <button class="btn btn-primary" type="submit" {% if product.stock_qty == 0 %}disabled{% endif %}>Add to Cart</button>
+      </form>
+
+      <div class="card">
+        <div class="card-body">
+          <h5>Questions about this product?</h5>
+          <p class="text-muted small">Product-specific questions are answered fastest by the seller directly.</p>
+          <form method="post" action="{{ url_for('customer.send_message', recipient_id=product.store.seller_id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <textarea name="body" class="form-control mb-2" rows="2" placeholder="Ask {{ product.store.name }} a question..." required></textarea>
+            <button class="btn btn-outline-primary btn-sm" type="submit">Message Seller</button>
+          </form>
+        </div>
+      </div>
+    {% elif not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to purchase</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

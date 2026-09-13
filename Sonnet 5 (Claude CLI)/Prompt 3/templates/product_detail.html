@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    {% for img in product.images %}
+    <img src="{{ img.file_path }}" class="img-fluid mb-2" alt="{{ product.name }}">
+    {% else %}
+    <div class="bg-light text-center py-5 text-muted">No image</div>
+    {% endfor %}
+  </div>
+  <div class="col-md-6">
+    <h1>{{ product.name }}</h1>
+    <p class="text-muted">Sold by {{ product.store.name }}</p>
+    <h3>${{ "%.2f"|format(product.price_cents / 100) }}</h3>
+    <p>{{ product.description }}</p>
+    <p>{% if product.inventory_count > 0 %}<span class="badge text-bg-success">{{ product.inventory_count }} in stock</span>{% else %}<span class="badge text-bg-secondary">Out of stock</span>{% endif %}</p>
+
+    {% if user and (user.role.value == 'customer' or user.role.value == 'admin') %}
+    <form method="post" action="/cart/add" class="d-flex gap-2 mb-3">
+      <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <input type="number" name="quantity" value="1" min="1" max="{{ product.inventory_count }}" class="form-control" style="width:100px" {% if product.inventory_count == 0 %}disabled{% endif %}>
+      <button class="btn btn-primary" type="submit" {% if product.inventory_count == 0 %}disabled{% endif %}>Add to cart</button>
+    </form>
+    <a href="/messages/{{ product.store_id }}" class="btn btn-outline-secondary">Message seller about this product</a>
+    {% elif not user %}
+    <a href="/login" class="btn btn-primary">Login to purchase</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

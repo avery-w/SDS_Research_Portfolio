@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Platform Settings</h2>
+<table class="table">
+  <tr><th>Key</th><th>Value</th></tr>
+  {% for s in settings %}
+  <tr><td>{{ s.key }}</td><td>{{ s.value }}</td></tr>
+  {% endfor %}
+</table>
+<form method="post" class="d-flex">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input class="form-control me-2" name="key" placeholder="key">
+  <input class="form-control me-2" name="value" placeholder="value">
+  <button class="btn btn-primary">Save</button>
+</form>
+{% endblock %}

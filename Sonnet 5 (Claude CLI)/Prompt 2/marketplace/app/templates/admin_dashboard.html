@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row g-3 mb-4">
+  <div class="col"><div class="card p-3">Users<br><strong>{{ total_users }}</strong></div></div>
+  <div class="col"><div class="card p-3">Sellers<br><strong>{{ total_sellers }}</strong></div></div>
+  <div class="col"><div class="card p-3">Orders<br><strong>{{ total_orders }}</strong></div></div>
+  <div class="col"><div class="card p-3">Revenue<br><strong>${{ '%.2f'|format(revenue) }}</strong></div></div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <h5>Orders by status</h5>
+    <ul class="list-group">
+      {% for status, count in orders_by_status.items() %}
+      <li class="list-group-item d-flex justify-content-between">{{ status }} <span>{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <h5>Top products (by listing count)</h5>
+    <ul class="list-group">
+      {% for name, count in top_products %}
+      <li class="list-group-item d-flex justify-content-between">{{ name }} <span>{{ count }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="mt-4">
+  <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">Manage Users</a>
+  <a href="{{ url_for('admin.stores') }}" class="btn btn-outline-primary">Manage Stores</a>
+  <a href="{{ url_for('admin.orders') }}" class="btn btn-outline-primary">Manage Orders</a>
+  <a href="{{ url_for('admin.settings') }}" class="btn btn-outline-primary">Platform Settings</a>
+</div>
+{% endblock %}

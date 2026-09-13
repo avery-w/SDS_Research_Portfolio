@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row mb-4 g-3">
+  <div class="col-md-3"><div class="card"><div class="card-body"><h6>Users</h6><h3>{{ total_users }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h6>Sellers</h6><h3>{{ total_sellers }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h6>Products</h6><h3>{{ total_products }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><h6>Orders</h6><h3>{{ total_orders }}</h3></div></div></div>
+</div>
+<div class="card mb-4">
+  <div class="card-body">
+    <h6>Total Revenue</h6>
+    <h3>${{ "%.2f"|format(total_revenue) }}</h3>
+  </div>
+</div>
+<h5>Top Products</h5>
+<table class="table">
+  <thead><tr><th>Product</th><th>Units Sold</th></tr></thead>
+  <tbody>
+  {% for name, qty in top_products %}
+    <tr><td>{{ name }}</td><td>{{ qty }}</td></tr>
+  {% else %}
+    <tr><td colspan="2">No sales yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

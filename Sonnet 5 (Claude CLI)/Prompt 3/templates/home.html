@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Marketplace{% endblock %}
+{% block content %}
+<h1 class="mb-4">{% if q %}Results for "{{ q }}"{% else %}Latest products{% endif %}</h1>
+<div class="row row-cols-1 row-cols-md-4 g-4">
+  {% for p in products %}
+  <div class="col">
+    <div class="card h-100">
+      {% if p.images %}
+      <img src="{{ p.images[0].file_path }}" class="card-img-top" alt="{{ p.name }}" style="height:180px;object-fit:cover">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title"><a href="/products/{{ p.id }}">{{ p.name }}</a></h5>
+        <p class="card-text">${{ "%.2f"|format(p.price_cents / 100) }}</p>
+        <p class="text-muted small">{{ p.store.name }}</p>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p>No products found.</p>
+  {% endfor %}
+</div>
+{% endblock %}

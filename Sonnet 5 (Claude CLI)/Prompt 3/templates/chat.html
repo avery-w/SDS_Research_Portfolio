@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}AI Assistant{% endblock %}
+{% block content %}
+<h1 class="mb-4">AI Shopping Assistant</h1>
+<p class="text-muted">For anything specific to a product or an order, use the "Message seller" button on that product/order page &mdash; the seller knows their inventory best.</p>
+<div class="border rounded p-3 mb-3" style="max-height:400px;overflow-y:auto">
+  {% for m in history %}
+  <div class="mb-2 {% if m.role == 'user' %}text-end{% endif %}">
+    <span class="badge {% if m.role == 'user' %}text-bg-primary{% else %}text-bg-success{% endif %}">{{ m.role }}</span>
+    <div>{{ m.content }}</div>
+  </div>
+  {% else %}
+  <p class="text-muted">Ask me about how shipping, checkout, or returns work.</p>
+  {% endfor %}
+</div>
+<form method="post" action="/chat" class="d-flex gap-2">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <input type="text" name="message" class="form-control" placeholder="Ask a question..." required maxlength="2000">
+  <button class="btn btn-primary" type="submit">Send</button>
+</form>
+{% endblock %}

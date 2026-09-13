@@ -1,0 +1,4 @@
+#chatbot-box { position: fixed; bottom: 20px; right: 20px; width: 320px; z-index: 1050; }
+#chatbot-log { height: 240px; overflow-y: auto; background: #fff; border: 1px solid #ccc; padding: 8px; font-size: 0.9rem; }
+.chat-msg-user { text-align: right; color: #0d6efd; }
+.chat-msg-bot { text-align: left; color: #333; }

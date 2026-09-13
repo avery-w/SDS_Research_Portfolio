@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<h2>Your Cart</h2>
+{% if not cart.items %}
+  <p>Your cart is empty. <a href="{{ url_for('customer.home') }}">Continue shopping</a></p>
+{% else %}
+<table class="table align-middle">
+  <thead><tr><th>Product</th><th>Price</th><th>Quantity</th><th>Total</th><th></th></tr></thead>
+  <tbody>
+  {% for item in cart.items %}
+    <tr>
+      <td><a href="{{ url_for('customer.product_detail', product_id=item.product.id) }}">{{ item.product.name }}</a></td>
+      <td>${{ "%.2f"|format(item.product.price) }}</td>
+      <td style="width:120px;">
+        <form method="post" action="{{ url_for('customer.cart_update', item_id=item.id) }}" class="d-flex">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="form-control form-control-sm">
+          <button class="btn btn-sm btn-outline-secondary ms-1" type="submit">Update</button>
+        </form>
+      </td>
+      <td>${{ "%.2f"|format(item.product.price * item.quantity) }}</td>
+      <td>
+        <form method="post" action="{{ url_for('customer.cart_remove', item_id=item.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-sm btn-danger" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h4>Subtotal: ${{ "%.2f"|format(subtotal) }}</h4>
+<a href="{{ url_for('customer.checkout') }}" class="btn btn-success">Proceed to Checkout</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h2>Messages</h2>
+<table class="table">
+  <thead><tr><th>With</th><th>Message</th><th>Date</th></tr></thead>
+  <tbody>
+  {% for m in threads %}
+    {% set other = m.sender if m.sender_id != current_user.id else m.recipient %}
+    <tr>
+      <td>{{ other.name }}</td>
+      <td>{{ m.body }}</td>
+      <td>{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}
+        <form method="post" action="{{ url_for('customer.send_message', recipient_id=other.id) }}" class="mt-1">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <div class="input-group input-group-sm">
+            <input type="text" name="body" class="form-control" placeholder="Reply...">
+            <button class="btn btn-outline-primary" type="submit">Reply</button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">No messages yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

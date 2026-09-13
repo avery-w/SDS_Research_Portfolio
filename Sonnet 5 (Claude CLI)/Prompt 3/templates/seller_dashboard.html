@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Seller dashboard{% endblock %}
+{% block content %}
+<h1 class="mb-4">Seller dashboard</h1>
+
+{% if not store %}
+<h5>Set up your store</h5>
+<form method="post" action="/seller/store">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <div class="mb-2"><input class="form-control" name="name" placeholder="Store name" required></div>
+  <div class="mb-2"><textarea class="form-control" name="description" placeholder="Description"></textarea></div>
+  <button class="btn btn-primary" type="submit">Create store</button>
+</form>
+{% else %}
+<h5>{{ store.name }} {% if not store.is_active %}<span class="badge text-bg-danger">Deactivated by admin</span>{% endif %}</h5>
+<p>{{ store.description }}</p>
+<div class="d-flex gap-2 mb-4">
+  <a href="/seller/products" class="btn btn-outline-primary">Products</a>
+  <a href="/seller/products/new" class="btn btn-outline-primary">Add product</a>
+  <a href="/seller/orders" class="btn btn-outline-primary">Orders</a>
+  <a href="/seller/messages" class="btn btn-outline-primary">Messages</a>
+</div>
+<h6>Edit store info</h6>
+<form method="post" action="/seller/store">
+  <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+  <div class="mb-2"><input class="form-control" name="name" value="{{ store.name }}" required></div>
+  <div class="mb-2"><textarea class="form-control" name="description">{{ store.description }}</textarea></div>
+  <button class="btn btn-outline-secondary" type="submit">Save</button>
+</form>
+{% endif %}
+{% endblock %}

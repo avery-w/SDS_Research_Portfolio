@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}My products{% endblock %}
+{% block content %}
+<h1 class="mb-4">My products</h1>
+<a href="/seller/products/new" class="btn btn-primary mb-3">Add product</a>
+<table class="table">
+  <thead><tr><th>Name</th><th>Price</th><th>Inventory</th><th>Active</th><th></th></tr></thead>
+  <tbody>
+    {% for p in products %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>${{ "%.2f"|format(p.price_cents / 100) }}</td>
+      <td>{{ p.inventory_count }}</td>
+      <td>{{ "Yes" if p.is_active else "No" }}</td>
+      <td><a href="/seller/products/{{ p.id }}/edit" class="btn btn-sm btn-outline-secondary">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

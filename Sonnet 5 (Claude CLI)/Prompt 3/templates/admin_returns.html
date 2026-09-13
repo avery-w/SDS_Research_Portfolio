@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Returns{% endblock %}
+{% block content %}
+<h1 class="mb-4">Return requests</h1>
+<table class="table">
+  <thead><tr><th>Order item</th><th>Reason</th><th>Status</th><th>Decision</th></tr></thead>
+  <tbody>
+    {% for r in returns %}
+    <tr>
+      <td>{{ r.order_item.product.name }} (order #{{ r.order_item.order_id }})</td>
+      <td>{{ r.reason }}</td>
+      <td>{{ r.status.value }}</td>
+      <td>
+        {% if r.status.value == 'requested' %}
+        <form method="post" action="/admin/returns/{{ r.id }}/decide" class="d-flex gap-1">
+          <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}">
+          <select name="decision" class="form-select form-select-sm">
+            <option value="approved">Approve</option>
+            <option value="rejected">Reject</option>
+            <option value="refunded">Refund</option>
+          </select>
+          <button class="btn btn-sm btn-outline-primary" type="submit">Submit</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

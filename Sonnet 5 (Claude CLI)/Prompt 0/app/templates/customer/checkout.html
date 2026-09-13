@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h2>Checkout</h2>
+<div class="row">
+  <div class="col-md-6">
+    <h5>Shipping Address</h5>
+    <form id="rate-form">
+      <div class="mb-2">
+        <input type="text" class="form-control" id="ship_name" placeholder="Full name" value="{{ user.name }}" required>
+      </div>
+      <div class="mb-2">
+        <input type="text" class="form-control" id="ship_address" placeholder="Street address" value="{{ user.address_line1 or '' }}" required>
+      </div>
+      <div class="row g-2 mb-2">
+        <div class="col"><input type="text" class="form-control" id="ship_city" placeholder="City" value="{{ user.city or '' }}" required></div>
+        <div class="col-3"><input type="text" class="form-control" id="ship_state" placeholder="State" value="{{ user.state or '' }}" required></div>
+        <div class="col-3"><input type="text" class="form-control" id="ship_zip" placeholder="ZIP" value="{{ user.zip_code or '' }}" required></div>
+      </div>
+      <button class="btn btn-outline-primary" type="submit">Get Shipping Rates</button>
+    </form>
+
+    <div id="rates-container" class="mt-3"></div>
+  </div>
+  <div class="col-md-6">
+    <h5>Order Summary</h5>
+    <ul class="list-group mb-3">
+      {% for item in cart.items %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ item.product.name }} x{{ item.quantity }}</span>
+          <span>${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+        </li>
+      {% endfor %}
+      <li class="list-group-item d-flex justify-content-between">
+        <strong>Subtotal</strong><strong>${{ "%.2f"|format(subtotal) }}</strong>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <span>Shipping</span><span id="shipping-display">Select a rate</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between">
+        <strong>Total</strong><strong id="total-display">${{ "%.2f"|format(subtotal) }}</strong>
+      </li>
+    </ul>
+
+    <form method="post" action="{{ url_for('customer.place_order') }}" id="order-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="ship_name" id="f_ship_name">
+      <input type="hidden" name="ship_address" id="f_ship_address">
+      <input type="hidden" name="ship_city" id="f_ship_city">
+      <input type="hidden" name="ship_state" id="f_ship_state">
+      <input type="hidden" name="ship_zip" id="f_ship_zip">
+      <input type="hidden" name="service_code" id="f_service_code">
+      <input type="hidden" name="service_name" id="f_service_name">
+      <input type="hidden" name="shipping_cost" id="f_shipping_cost" value="0">
+      <button class="btn btn-success w-100" type="submit" id="place-order-btn" disabled>Place Order</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const subtotal = {{ subtotal }};
+document.getElementById('rate-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const body = {
+    address: document.getElementById('ship_address').value,
+    city: document.getElementById('ship_city').value,
+    state: document.getElementById('ship_state').value,
+    zip: document.getElementById('ship_zip').value,
+  };
+  const resp = await fetch("{{ url_for('api.shipping_rates') }}", {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body),
+  });
+  const data = await resp.json();
+  const container = document.getElementById('rates-container');
+  container.innerHTML = '';
+  if (data.error) {
+    container.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+    return;
+  }
+  data.rates.forEach(rate => {
+    const div = document.createElement('div');
+    div.className = 'form-check';
+    div.innerHTML = `
+      <input class="form-check-input" type="radio" name="rate" id="rate-${rate.code}"
+        value="${rate.cost}" data-code="${rate.code}" data-name="${rate.name}">
+      <label class="form-check-label" for="rate-${rate.code}">${rate.name} - $${rate.cost.toFixed(2)}</label>`;
+    container.appendChild(div);
+  });
+  container.querySelectorAll('input[name=rate]').forEach(radio => {
+    radio.addEventListener('change', function() {
+      const cost = parseFloat(this.value);
+      document.getElementById('shipping-display').textContent = '$' + cost.toFixed(2);
+      document.getElementById('total-display').textContent = '$' + (subtotal + cost).toFixed(2);
+      document.getElementById('f_service_code').value = this.dataset.code;
+      document.getElementById('f_service_name').value = this.dataset.name;
+      document.getElementById('f_shipping_cost').value = cost.toFixed(2);
+      document.getElementById('place-order-btn').disabled = false;
+    });
+  });
+});
+
+document.getElementById('order-form').addEventListener('submit', function() {
+  document.getElementById('f_ship_name').value = document.getElementById('ship_name').value;
+  document.getElementById('f_ship_address').value = document.getElementById('ship_address').value;
+  document.getElementById('f_ship_city').value = document.getElementById('ship_city').value;
+  document.getElementById('f_ship_state').value = document.getElementById('ship_state').value;
+  document.getElementById('f_ship_zip').value = document.getElementById('ship_zip').value;
+});
+</script>
+{% endblock %}

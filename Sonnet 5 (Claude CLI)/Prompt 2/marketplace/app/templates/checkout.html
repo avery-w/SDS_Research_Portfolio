@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Checkout</h2>
+<p>Shipping from: 110 Inner Campus Drive, Austin, TX 78705</p>
+<form method="post" id="checkout-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-2">
+    <div class="col-md-6"><input class="form-control" name="name" placeholder="Full name" required></div>
+    <div class="col-md-6"><input class="form-control" name="line1" placeholder="Street address" required></div>
+    <div class="col-md-4"><input class="form-control" name="city" placeholder="City" required></div>
+    <div class="col-md-2"><input class="form-control" name="state" placeholder="State" maxlength="2" required></div>
+    <div class="col-md-3"><input class="form-control" id="zip" name="zip" placeholder="Zip" required></div>
+    <div class="col-md-3">
+      <select class="form-select" id="service" name="service">
+        <option value="ground">Ground</option>
+        <option value="3day">3 Day Select</option>
+        <option value="2day">2nd Day Air</option>
+        <option value="next_day">Next Day Air</option>
+      </select>
+    </div>
+  </div>
+  <button type="button" id="estimate-btn" class="btn btn-outline-secondary mt-2">Estimate Shipping</button>
+  <p id="rate-result" class="mt-2"></p>
+  <button class="btn btn-primary mt-2">Place Order</button>
+</form>
+<script>
+document.getElementById('estimate-btn').addEventListener('click', async function () {
+  const zip = document.getElementById('zip').value;
+  const service = document.getElementById('service').value;
+  const resp = await fetch('/api/checkout/shipping-rate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ zip: zip, weight_lbs: {{ items|sum(attribute='product.weight_oz')/16 if items else 1 }}, service: service })
+  });
+  const data = await resp.json();
+  document.getElementById('rate-result').textContent = data.rate ? `Estimated shipping: $${data.rate}` : (data.error || 'Could not estimate rate');
+});
+</script>
+{% endblock %}

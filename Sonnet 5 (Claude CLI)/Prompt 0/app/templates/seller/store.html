@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}My Store{% endblock %}
+{% block content %}
+<h2>Store Profile</h2>
+<form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="mb-3">
+    <label class="form-label">Store name</label>
+    <input type="text" class="form-control" name="name" value="{{ store.name }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description" rows="3">{{ store.description or '' }}</textarea>
+  </div>
+  <button class="btn btn-primary" type="submit">Save</button>
+</form>
+{% endblock %}

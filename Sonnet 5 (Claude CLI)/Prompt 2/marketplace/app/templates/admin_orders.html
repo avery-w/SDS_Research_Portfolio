@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Orders</h2>
+<table class="table">
+  <tr><th>#</th><th>Customer</th><th>Status</th><th>Total</th><th></th></tr>
+  {% for o in orders %}
+  <tr>
+    <td>{{ o.id }}</td>
+    <td>{{ o.customer.email }}</td>
+    <td>{{ o.status }}</td>
+    <td>${{ '%.2f'|format(o.total) }}</td>
+    <td>
+      <form method="post" action="{{ url_for('admin.override_order_status', order_id=o.id) }}" class="d-flex">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <select name="status" class="form-select form-select-sm me-1">
+          {% for s in ['pending','paid','shipped','delivered','cancelled','returned'] %}
+          <option value="{{ s }}" {{ 'selected' if s == o.status else '' }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm btn-outline-primary">Set</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<h1 class="mb-4">Admin dashboard</h1>
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Total sales</div><h3>${{ "%.2f"|format(total_sales_cents / 100) }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Orders</div><h3>{{ order_count }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Users</div><h3>{{ user_count }}</h3></div></div>
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">Stores</div><h3>{{ store_count }}</h3></div></div>
+</div>
+<p><a href="/admin/returns">{{ pending_returns }} pending return request(s)</a></p>
+<div class="d-flex gap-2 mb-4">
+  <a href="/admin/users" class="btn btn-outline-primary">Users</a>
+  <a href="/admin/stores" class="btn btn-outline-primary">Stores</a>
+  <a href="/admin/products" class="btn btn-outline-primary">Products</a>
+  <a href="/admin/orders" class="btn btn-outline-primary">Orders</a>
+  <a href="/admin/returns" class="btn btn-outline-primary">Returns</a>
+  <a href="/admin/settings" class="btn btn-outline-primary">Settings</a>
+</div>
+<h5>Top-selling products</h5>
+<table class="table">
+  <thead><tr><th>Product</th><th>Units sold</th></tr></thead>
+  <tbody>
+    {% for name, sold in top_products %}
+    <tr><td>{{ name }}</td><td>{{ sold }}</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Return Requests{% endblock %}
+{% block content %}
+<h2>Return Requests</h2>
+<table class="table">
+  <thead><tr><th>Product</th><th>Customer</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for ret in returns %}
+    <tr>
+      <td>{{ ret.order_item.product.name }}</td>
+      <td>{{ ret.order_item.order.customer.email }}</td>
+      <td>{{ ret.reason }}</td>
+      <td><span class="badge bg-secondary">{{ ret.status }}</span></td>
+      <td>
+        {% if ret.status == 'pending' %}
+          <form method="post" action="{{ url_for('admin.decide_return', return_id=ret.id, decision='approved') }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-success" type="submit">Approve</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.decide_return', return_id=ret.id, decision='rejected') }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-danger" type="submit">Reject</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5">No return requests.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

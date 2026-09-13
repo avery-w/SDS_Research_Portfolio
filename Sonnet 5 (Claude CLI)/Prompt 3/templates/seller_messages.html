@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h1 class="mb-4">Customer messages</h1>
+{% if not threads %}
+<p>No messages yet.</p>
+{% else %}
+<ul class="list-group">
+  {% for customer_id in threads %}
+  <li class="list-group-item"><a href="/seller/messages/{{ customer_id }}">Conversation with customer #{{ customer_id }}</a></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

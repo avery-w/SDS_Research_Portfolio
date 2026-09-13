@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    {% for img in product.images %}
+    <img src="{{ url_for('static', filename='uploads/' + img.filename) }}" class="img-fluid mb-2">
+    {% endfor %}
+  </div>
+  <div class="col-md-6">
+    <h2>{{ product.name }}</h2>
+    <p class="text-muted">Sold by {{ product.store.name }}</p>
+    <p>{{ product.description }}</p>
+    <h4>${{ '%.2f'|format(product.price) }}</h4>
+    <p>{{ product.stock_qty }} in stock</p>
+    {% if current_user.is_authenticated and current_user.role == 'customer' %}
+    <form method="post" action="{{ url_for('customer.cart_add', product_id=product.id) }}" class="d-flex mb-3">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="number" name="quantity" value="1" min="1" class="form-control me-2" style="width:80px">
+      <button class="btn btn-success">Add to Cart</button>
+    </form>
+    <form method="post" action="{{ url_for('customer.message_seller', seller_id=product.store.seller_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="product_id" value="{{ product.id }}">
+      <textarea name="body" class="form-control mb-2" placeholder="Ask the seller a question about this product..."></textarea>
+      <button class="btn btn-outline-secondary">Message Seller</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

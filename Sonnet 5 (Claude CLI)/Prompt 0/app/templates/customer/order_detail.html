@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }}{% endblock %}
+{% block content %}
+<h2>Order #{{ order.id }}</h2>
+<p>Shipping to: {{ order.ship_name }}, {{ order.ship_address }}, {{ order.ship_city }}, {{ order.ship_state }} {{ order.ship_zip }}</p>
+<p>Shipping method: {{ order.ups_service_name }} (${{ "%.2f"|format(order.shipping_cost) }})</p>
+
+<table class="table align-middle">
+  <thead><tr><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for item in order.items %}
+    <tr>
+      <td>{{ item.product.name }} <span class="text-muted small">({{ item.store.name }})</span></td>
+      <td>{{ item.quantity }}</td>
+      <td>${{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+      <td><span class="badge bg-secondary">{{ item.status }}</span></td>
+      <td>
+        {% if item.status == 'pending' %}
+          <form method="post" action="{{ url_for('customer.cancel_item', item_id=item.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Cancel</button>
+          </form>
+        {% elif item.status == 'delivered' %}
+          <button class="btn btn-sm btn-outline-warning" data-bs-toggle="collapse" data-bs-target="#return-{{ item.id }}">Request Return</button>
+          <div class="collapse mt-2" id="return-{{ item.id }}">
+            <form method="post" action="{{ url_for('customer.request_return', item_id=item.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <textarea name="reason" class="form-control mb-2" rows="2" placeholder="Reason for return" required></textarea>
+              <button class="btn btn-sm btn-warning" type="submit">Submit Return Request</button>
+            </form>
+          </div>
+        {% endif %}
+        <form method="post" action="{{ url_for('customer.send_message', recipient_id=item.store.seller_id) }}" class="mt-2">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="order_id" value="{{ order.id }}">
+          <input type="hidden" name="product_id" value="{{ item.product.id }}">
+          <div class="input-group input-group-sm">
+            <input type="text" name="body" class="form-control" placeholder="Message the seller...">
+            <button class="btn btn-outline-primary" type="submit">Send</button>
+          </div>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h5>Subtotal: ${{ "%.2f"|format(order.subtotal) }} + Shipping: ${{ "%.2f"|format(order.shipping_cost) }} = Total: ${{ "%.2f"|format(order.total) }}</h5>
+{% endblock %}
