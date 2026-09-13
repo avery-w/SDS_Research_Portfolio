@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}My Returns – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Return Requests</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h2 class="font-semibold mb-4">Request a Return</h2>
+    <form hx-post="/api/v1/returns" hx-target="#return-form" hx-swap="outerHTML">
+      <div class="grid grid-cols-1 gap-4" id="return-form">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Order ID</label>
+          <input required name="order_id" type="number" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="123">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Order Item ID (optional)</label>
+          <input name="order_item_id" type="number" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="456">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Reason</label>
+          <select required name="reason" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+            <option value="defective">Defective item</option>
+            <option value="wrong_item">Wrong item received</option>
+            <option value="not_as_described">Not as described</option>
+            <option value="changed_mind">Changed my mind</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Description (optional)</label>
+          <textarea name="description" rows="3" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Additional details..."></textarea>
+        </div>
+        <button type="submit" class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition">Submit Return Request</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Return List -->
+  <h2 class="text-xl font-semibold mt-8 mb-4">Your Returns</h2>
+  <div id="returns-list" hx-get="/api/v1/returns" hx-trigger="load" hx-swap="innerHTML"></div>
+</div>
+{% endblock %}

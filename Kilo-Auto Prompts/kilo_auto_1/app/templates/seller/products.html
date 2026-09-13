@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}My Products – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">My Products</h1>
+    <button x-data="{show:false}" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700" @click="show=true">+ Add Product</button>
+  </div>
+
+  <!-- Add form -->
+  <div x-show="show" x-transition class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <h2 class="font-semibold mb-4">New Product</h2>
+    <form hx-post="/api/v1/seller/products" hx-target="#product-list" hx-swap="innerHTML" hx-on::after-request="this.reset(); show=false">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input required name="name" type="text" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Product name">
+        <input name="sku" type="text" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="SKU">
+        <input required name="price" type="number" step="0.01" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="0.00">
+        <input name="cost_price" type="number" step="0.01" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Cost">
+        <input name="category_id" type="number" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Category ID">
+        <input name="stock_quantity" type="number" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Stock">
+        <textarea name="description" rows="2" class="md:col-span-2 px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Description"></textarea>
+      </div>
+      <button type="submit" class="mt-4 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700">Save</button>
+    </form>
+  </div>
+
+  <!-- Product list -->
+  <div id="product-list" hx-get="/api/v1/seller/products" hx-trigger="load" hx-swap="innerHTML"></div>
+</div>
+{% endblock %}

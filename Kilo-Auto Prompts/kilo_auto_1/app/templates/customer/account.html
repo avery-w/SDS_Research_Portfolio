@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Account – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">My Account</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h2 class="font-semibold mb-4">Profile</h2>
+    <form hx-patch="/api/v1/users/{{ user.id }}" hx-target="#profile-form" hx-swap="outerHTML">
+      <div id="profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Full Name</label>
+          <input name="full_name" type="text" value="{{ user.full_name }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" value="{{ user.email }}" disabled class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg bg-gray-50">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Phone</label>
+          <input name="phone" type="tel" value="{{ user.phone or '' }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="+1 555-000-0000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Address</label>
+          <input name="address_line1" type="text" value="{{ user.address_line1 or '' }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="123 Main St">
+        </div>
+        <div>
+          <input name="address_line2" type="text" value="{{ user.address_line2 or '' }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Apt, Suite...">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700">Change Password</label>
+          <div class="flex gap-2">
+            <input type="password" name="current_password" class="flex-grow px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Current password" disabled>
+            <input type="password" name="new_password" class="flex-grow px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="New password (min 8 chars)" disabled>
+            <button type="submit" class="px-4 py-2.5 bg-gray-300 text-gray-500 font-medium rounded-lg" disabled>Update</button>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Enable in profile to change password</p>
+        </div>
+        <button type="submit" class="md:col-span-2 w-fit px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="mt-6 bg-white rounded-xl border border-red-200 p-6">
+    <h2 class="font-semibold mb-4 text-red-700">Danger Zone</h2>
+    <p class="text-gray-500 mb-4">Contact support to deactivate your account.</p>
+    <a href="/messages" class="inline-flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition">
+      Contact Support
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Settings – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Platform Settings</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h2 class="font-semibold mb-4">General Settings</h2>
+    <form hx-put="/api/v1/admin/settings" hx-target="#flash-container" hx-swap="outerHTML">
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Store Name</label>
+          <input name="store_name" type="text" value="{{ settings.get('store_name', {}).get('value', 'Kilo Marketplace') }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Contact Email</label>
+          <input name="contact_email" type="email" value="{{ settings.get('contact_email', {}).get('value', 'support@kilo.example') }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tax Rate (%)</label>
+          <input name="tax_rate" type="number" step="0.1" value="{{ settings.get('tax_rate', {}).get('value', '8.0') }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Free Shipping Threshold ($)</label>
+          <input name="free_shipping_threshold" type="number" step="1" value="{{ settings.get('free_shipping_threshold', {}).get('value', '50') }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Default Currency</label>
+          <input name="currency" type="text" value="{{ settings.get('currency', {}).get('value', 'USD') }}" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg">
+        </div>
+        <button type="submit" class="mt-4 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700">Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

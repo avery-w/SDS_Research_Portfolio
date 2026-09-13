@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <div class="text-center py-20">
+    <span class="text-6xl">🛒</span>
+    <h1 class="mt-4 text-4xl font-bold">Welcome to Kilo Marketplace</h1>
+    <p class="mt-2 text-xl text-gray-500">Buy, sell, and ship with confidence</p>
+    <div class="mt-8 flex justify-center gap-4">
+      <a href="/products" class="px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition shadow-lg shadow-primary-500/20">
+        Browse Products
+      </a>
+      <a href="/register" class="px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition">
+        Join Now
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

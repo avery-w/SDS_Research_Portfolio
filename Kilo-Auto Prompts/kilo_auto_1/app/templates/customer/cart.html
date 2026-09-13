@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Your Cart – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">🛒 Your Cart</h1>
+
+  <div hx-get="/api/v1/cart" hx-trigger="load, every 30s" hx-swap="outerHTML" hx-target="#cart-content">
+    <div id="cart-content" class="bg-white rounded-xl border border-gray-200 p-6">
+      <div class="flex items-center justify-center py-12 text-gray-500">
+        <div class="text-center">
+          <span class="text-4xl">⏳</span>
+          <p class="mt-2">Loading cart...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6">
+    <a href="/products" class="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700">
+      ← Continue shopping
+    </a>
+  </div>
+</div>
+
+<!-- Cart item template -->
+<template id="cart-item-template">
+  <div class="flex items-center gap-4 p-4 border rounded-lg">
+    <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">📦</div>
+    <div class="flex-grow">
+      <h3 class="font-medium" x-text="product.name"></h3>
+      <p class="text-sm text-gray-500">$<span x-text="product.price"></span> each</p>
+    </div>
+    <div>
+      <label class="sr-only">Quantity</label>
+      <input type="number" min="1" max="999" class="w-20 px-2 py-1 border rounded" x-model="quantity">
+    </div>
+    <p class="font-medium w-20 text-right">$<span x-text="(product.price * quantity).toFixed(2)"></span></p>
+    <button hx-delete="/api/v1/cart/items/0" class="text-red-500 hover:text-red-700 text-lg">✕</button>
+  </div>
+</template>
+{% endblock %}

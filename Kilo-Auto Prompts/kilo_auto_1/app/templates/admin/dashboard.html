@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Admin Dashboard</h1>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <p class="text-sm text-gray-500">Users</p>
+      <p class="mt-1 text-3xl font-bold">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <p class="text-sm text-gray-500">Sellers</p>
+      <p class="mt-1 text-3xl font-bold">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <p class="text-sm text-gray-500">Products</p>
+      <p class="mt-1 text-3xl font-bold">0</p>
+    </div>
+    <div class="bg-white p-6 rounded-xl border border-gray-200">
+      <p class="text-sm text-gray-500">Revenue</p>
+      <p class="mt-1 text-3xl font-bold">$0.00</p>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <a href="/admin/users" class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition">
+      <span class="text-3xl">👥</span>
+      <h3 class="mt-2 font-semibold">Manage Users</h3>
+      <p class="text-sm text-gray-500">View and manage customer/seller accounts</p>
+    </a>
+    <a href="/admin/orders" class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition">
+      <span class="text-3xl">📋</span>
+      <h3 class="mt-2 font-semibold">All Orders</h3>
+      <p class="text-sm text-gray-500">Monitor and override orders</p>
+    </a>
+    <a href="/admin/products" class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition">
+      <span class="text-3xl">📦</span>
+      <h3 class="mt-2 font-semibold">All Products</h3>
+      <p class="text-sm text-gray-500">Moderate product listings</p>
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Stores – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">All Stores</h1>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="stores-grid">
+    {% for store in stores %}
+    <a href="/stores/slug/{{ store.slug }}" class="block bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition">
+      {% if store.logo_image %}
+      <img src="{{ store.logo_image }}" alt="{{ store.name }}" class="w-16 h-16 rounded-lg object-cover mb-4">
+      {% else %}
+      <span class="text-4xl block mb-4">🏪</span>
+      {% endif %}
+      <h3 class="font-semibold text-lg">{{ store.name }}</h3>
+      <p class="mt-1 text-sm text-gray-500">Active</p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" x-data="appData()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Kilo Marketplace{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/htmx.org@1.9.12/dist/htmx.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af', 900:'#1e3a8a' },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        [hx-confirm]::before { content: attr(hx-confirm); }
+        .flash { animation: slideDown 0.3s ease; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col" x-init="initApp()">
+
+    <!-- Flash Messages -->
+    <div id="flash-container" class="fixed top-4 right-4 z-[100] space-y-2" aria-live="polite">
+        <template x-for="msg in flashMessages" :key="msg.id">
+            <div class="flash px-4 py-3 rounded-lg shadow-lg text-white text-sm font-medium"
+                 :class="msg.type === 'error' ? 'bg-red-600' : msg.type === 'warning' ? 'bg-amber-500' : 'bg-green-600'"
+                 x-text="msg.text"
+                 @click="removeFlash(msg.id)"></div>
+        </template>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50" x-show="!sidebarOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="transform -translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-2xl font-bold text-primary-600 flex items-center gap-2">
+                        <span class="text-3xl">🛒</span> Kilo
+                    </a>
+                </div>
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="/" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition" href="/">Home</a>
+                    <a href="/products" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Products</a>
+                    {% if user %}
+                    {% if user.role.value == 'customer' %}
+                    <a href="/cart" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Cart</a>
+                    <a href="/orders" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Orders</a>
+                    <a href="/messages" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Messages</a>
+                    <a href="/chatbot" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">🤖 Help</a>
+                    {% elif user.role.value == 'seller' %}
+                    <a href="/seller" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Dashboard</a>
+                    <a href="/seller/products" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Products</a>
+                    <a href="/seller/orders" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Orders</a>
+                    {% elif user.role.value == 'admin' %}
+                    <a href="/admin" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Admin</a>
+                    <a href="/admin/users" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Users</a>
+                    <a href="/admin/orders" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Orders</a>
+                    <a href="/admin/products" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Products</a>
+                    <a href="/admin/settings" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Settings</a>
+                    {% endif %}
+                    <div class="flex items-center ml-4 space-x-2">
+                        <span class="text-xs px-2 py-1 rounded-full bg-primary-100 text-primary-700 font-medium" x-text="user.role"></span>
+                        <a :href="'/users/' + user.id + '/account'" class="text-sm font-medium text-gray-600 hover:text-gray-900" x-text="user.full_name"></a>
+                        <form hx-post="/api/v1/auth/logout" hx-target="_top" class="inline">
+                            <button type="submit" class="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition">Logout</button>
+                        </form>
+                    </div>
+                    {% else %}
+                    <a href="/login" class="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition">Login</a>
+                    <a href="/register" class="ml-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition shadow">Register</a>
+                    {% endif %}
+                </div>
+                <div class="flex items-center md:hidden">
+                    <button @click="sidebarOpen = true" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile sidebar -->
+        <div x-show="sidebarOpen" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="transform translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="translate-x-0" x-transition:leave-end="transform translate-x-full" class="fixed inset-0 z-50 md:hidden">
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-50" @click="sidebarOpen = false"></div>
+            <div class="fixed inset-y-0 right-0 w-64 bg-white p-5 shadow-xl">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-xl font-bold text-primary-600">🛒 Kilo</span>
+                    <button @click="sidebarOpen = false" class="p-1 text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div class="space-y-1">
+                    <a href="/" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Home</a>
+                    <a href="/products" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Products</a>
+                    {% if user %}
+                    {% if user.role.value == 'customer' %}
+                    <a href="/cart" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Cart</a>
+                    <a href="/orders" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Orders</a>
+                    <a href="/messages" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Messages</a>
+                    {% elif user.role.value == 'seller' %}
+                    <a href="/seller" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Dashboard</a>
+                    <a href="/seller/products" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Products</a>
+                    <a href="/seller/orders" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Orders</a>
+                    {% elif user.role.value == 'admin' %}
+                    <a href="/admin" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Admin</a>
+                    <a href="/admin/users" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Users</a>
+                    <a href="/admin/orders" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Orders</a>
+                    <a href="/admin/products" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Products</a>
+                    <a href="/admin/settings" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Settings</a>
+                    {% endif %}
+                    {% endif %}
+                    {% if not user %}
+                    <a href="/login" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100">Login</a>
+                    <a href="/register" @click="sidebarOpen=false" class="block px-3 py-2 rounded-lg text-sm font-medium text-primary-600 hover:bg-primary-50">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-lg font-bold text-primary-600 mb-2">🛒 Kilo Marketplace</h3>
+                    <p class="text-sm text-gray-500">Modern e-commerce marketplace connecting buyers and sellers.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Shop</h4>
+                    <ul class="space-y-1 text-sm text-gray-500">
+                        <li><a href="/products" class="hover:text-gray-900">All Products</a></li>
+                        <li><a href="/stores" class="hover:text-gray-900">Stores</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Support</h4>
+                    <ul class="space-y-1 text-sm text-gray-500">
+                        <li><a href="/chatbot" class="hover:text-gray-900">AI Help</a></li>
+                        <li><a href="/messages" class="hover:text-gray-900">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-2">Legal</h4>
+                    <ul class="space-y-1 text-sm text-gray-500">
+                        <li><span class="text-gray-400">Terms of Service</span></li>
+                        <li><span class="text-gray-400">Privacy Policy</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-400">
+                © 2026 Kilo Marketplace. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function appData() {
+            return {
+                sidebarOpen: false,
+                user: {{ user|tojson|safe if user else 'null' }},
+                flashMessages: [],
+                initApp() {
+                    this.flashMessages = [];
+                    // Load flash from hx-header if present
+                    document.addEventListener('htmx:response', (evt) => {
+                        const status = evt.detail.xhr.status;
+                        const headers = evt.detail.xhr.getAllResponseHeaders();
+                        const match = headers.match(/X-Flash:\s*(.+)/i);
+                        if (match) {
+                            try {
+                                const flashes = JSON.parse(decodeURIComponent(match[1]));
+                                flashes.forEach(f => {
+                                    const id = Date.now() + Math.random();
+                                    f.id = id;
+                                    this.flashMessages.push(f);
+                                    setTimeout(() => this.removeFlash(id), 4000);
+                                });
+                            } catch(e) {}
+                        }
+                    });
+                },
+                removeFlash(id) {
+                    this.flashMessages = this.flashMessages.filter(m => m.id !== id);
+                },
+                logout() {
+                    fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' })
+                        .then(() => window.location.href = '/');
+                }
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

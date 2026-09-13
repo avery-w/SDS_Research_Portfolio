@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Messages – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Messages</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Conversation list -->
+    <div class="md:col-span-1">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="p-4 border-b">
+          <button hx-post="/api/v1/messages" hx-vars="recipient_id:0" hx-target="#conv-list" class="text-sm text-primary-600 font-medium hover:underline">+ New Message</button>
+        </div>
+        <div id="conv-list" hx-get="/api/v1/messages" hx-trigger="load" hx-swap="innerHTML"></div>
+      </div>
+    </div>
+
+    <!-- Chat window -->
+    <div class="md:col-span-2 bg-white rounded-xl border border-gray-200 flex flex-col">
+      <div id="chat-header" class="p-4 border-b font-semibold">Select a conversation</div>
+      <div id="chat-messages" class="flex-grow p-4 space-y-3 overflow-y-auto max-h-96">
+        <p class="text-gray-400 text-center">No messages yet</p>
+      </div>
+      <div class="p-4 border-t">
+        <form hx-post="/api/v1/messages" hx-target="next" hx-swap="outerHTML" class="flex gap-2">
+          <input type="hidden" name="recipient_id" id="reply-recipient">
+          <input type="hidden" name="order_id" id="reply-order">
+          <input type="hidden" name="product_id" id="reply-product">
+          <input type="text" name="subject" id="reply-subject" class="hidden">
+          <input type="text" name="body" id="reply-body" placeholder="Type a message..." class="flex-grow px-4 py-2.5 border border-gray-300 rounded-lg"
+            @keydown.enter.prevent="document.querySelector('form').dispatchEvent(new Event('submit'))">
+          <button type="submit" class="px-4 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Send</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

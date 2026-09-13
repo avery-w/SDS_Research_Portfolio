@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Checkout – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Checkout</h1>
+
+  <!-- Step indicator -->
+  <div class="flex items-center justify-center gap-4 mb-8">
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-primary-600 text-white flex items-center justify-center text-sm font-bold">1</span>
+      <span class="text-sm font-medium">Address</span>
+    </div>
+    <div class="w-12 h-0.5 bg-gray-200"></div>
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">2</span>
+      <span class="text-sm font-medium text-gray-500">Shipping</span>
+    </div>
+    <div class="w-12 h-0.5 bg-gray-200"></div>
+    <div class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center text-sm font-bold">3</span>
+      <span class="text-sm font-medium text-gray-500">Payment</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Shipping Form -->
+    <div class="md:col-span-2">
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold mb-4">Shipping Address</h2>
+        <form hx-post="/api/v1/orders/checkout" hx-target="#checkout-result" hx-swap="innerHTML">
+          <div class="grid grid-cols-1 gap-4">
+            <input type="hidden" name="shipping_service" value="ups_ground">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Address Line 1</label>
+              <input required name="shipping_address_line1" type="text" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="123 Main St">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Address Line 2</label>
+              <input name="shipping_address_line2" type="text" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Apt, Suite...">
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">City</label>
+                <input required name="shipping_city" type="text" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Austin">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">State</label>
+                <input required name="shipping_state" type="text" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="TX">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700">ZIP</label>
+                <input required name="shipping_postal_code" type="text" class="mt-1 w-full px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="78705">
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <input type="checkbox" id="same-billing" name="billing_same_as_shipping" checked class="rounded">
+              <label for="same-billing" class="text-sm">Billing same as shipping</label>
+            </div>
+          </div>
+          <button type="submit" class="mt-6 w-full px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 transition">
+            Place Order
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 h-fit">
+      <h2 class="text-lg font-semibold mb-4">Order Summary</h2>
+      <div hx-get="/api/v1/cart" hx-target="#summary-items" hx-swap="innerHTML"></div>
+      <div id="summary-items"></div>
+      <div class="border-t pt-4 mt-4 space-y-2">
+        <div class="flex justify-between text-sm"><span>Subtotal</span><span>$0.00</span></div>
+        <div class="flex justify-between text-sm"><span>Shipping</span><span id="summary-shipping">$0.00</span></div>
+        <div class="flex justify-between text-sm"><span>Tax</span><span>$0.00</span></div>
+        <div class="flex justify-between font-bold text-lg pt-2 border-t">
+          <span>Total</span>
+          <span id="summary-total">$0.00</span>
+        </div>
+      </div>
+      <button hx-post="/api/v1/shipping/rates"
+              hx-vars="weight:2.5&destination_zip:78705"
+              hx-target="#summary-shipping"
+              hx-swap="outerHTML"
+              hx-on::after-request="if(event.detail.successful){
+                let rate=JSON.parse(event.detail.xhr.responseText).rates[0].rate;
+                document.getElementById('summary-shipping').textContent='$'+rate.toFixed(2);
+                document.getElementById('summary-total').textContent='$'+rate.toFixed(2);
+              }"
+              class="mt-4 w-full px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+        Calculate Shipping (UPS)
+      </button>
+    </div>
+  </div>
+
+  <div id="checkout-result" class="mt-6"></div>
+</div>
+{% endblock %}

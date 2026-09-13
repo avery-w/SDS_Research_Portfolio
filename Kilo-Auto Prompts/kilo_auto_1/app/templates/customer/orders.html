@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}My Orders – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Order History</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order #</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+          {% for order in orders %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap font-medium">
+              <a href="/orders/{{ order.id }}" class="text-primary-600 hover:underline">{{ order.order_number }}</a>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ order.created_at.strftime('%b %d, %Y') }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                {% if order.status.value == 'pending' %}bg-yellow-100 text-yellow-700
+                {% elif order.status.value in ('shipped','delivered') %}bg-blue-100 text-blue-700
+                {% elif order.status.value in ('cancelled','refunded') %}bg-gray-100 text-gray-700
+                {% else %}bg-green-100 text-green-700{% endif %}">
+                {{ order.status.value }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap font-medium">${{ "%.2f"|format(order.grand_total) }}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <a href="/orders/{{ order.id }}" class="text-sm text-primary-600 hover:underline">View</a>
+              {% if order.status in ['pending','confirmed'] %}
+              <form hx-post="/api/v1/orders/{{ order.id }}/cancel" hx-target="#flash-container" hx-swap="outerHTML" hx-on::after-request="if(event.detail.successful){location.reload()}" class="inline ml-2" hx-include="#csrf">
+                <input type="hidden" name="_csrf" value="">
+                <button type="submit" class="text-sm text-red-600 hover:underline" hx-confirm="Cancel this order?">Cancel</button>
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

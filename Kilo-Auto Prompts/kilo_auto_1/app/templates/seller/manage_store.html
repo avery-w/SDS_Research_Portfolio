@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Manage Store – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">Manage Your Store</h1>
+
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h2 class="font-semibold mb-4">Store Information</h2>
+    <form hx-patch="/api/v1/stores/my-store" hx-target="#store-form" hx-swap="outerHTML">
+      <div id="store-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input required name="name" type="text" value="{{ user.store.name if user.store else '' }}" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Store name">
+        <textarea name="description" rows="2" class="md:col-span-2 px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Store description">{{ user.store.description if user.store }}</textarea>
+        <input name="address_line1" type="text" value="{{ user.store.address_line1 if user.store else '' }}" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="Address">
+        <input name="city" type="text" value="{{ user.store.city if user.store else '' }}" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="City">
+        <input name="state" type="text" value="{{ user.store.state if user.store else '' }}" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="State">
+        <input name="postal_code" type="text" value="{{ user.store.postal_code if user.store else '' }}" class="px-4 py-2.5 border border-gray-300 rounded-lg" placeholder="ZIP">
+      </div>
+      <button type="submit" class="mt-4 px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700">Save Changes</button>
+    </form>
+  </div>
+
+  {% if user.store %}
+  <div class="mt-6">
+    <h2 class="text-xl font-semibold mb-4">Quick Links</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <a href="/seller/products" class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition">
+        <span class="text-3xl">📦</span>
+        <h3 class="mt-2 font-semibold">Products</h3>
+      </a>
+      <a href="/seller/orders" class="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition">
+        <span class="text-3xl">📋</span>
+        <h3 class="mt-2 font-semibold">Orders</h3>
+      </a>
+    </div>
+  </div>
+  {% else %}
+  <div class="mt-6 bg-primary-50 rounded-xl p-6 text-center">
+    <p class="text-primary-700">Complete your store setup above to start selling!</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

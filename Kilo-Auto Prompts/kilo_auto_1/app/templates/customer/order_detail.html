@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Order Details – Kilo Marketplace{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+  <h1 class="text-3xl font-bold mb-6">
+    Order <span class="text-primary-600">{{ order.order_number }}</span>
+    <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium capitalize bg-{{ status_bg }}-100 text-{{ status_bg }}-700">
+      {{ order.status.value }}
+    </span>
+  </h1>
+
+  <!-- Items -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <h2 class="font-semibold mb-4">Items</h2>
+    {% for item in order.items %}
+    <div class="flex items-center gap-4 py-4 border-b last:border-0">
+      <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-2xl">📦</div>
+      <div class="flex-grow">
+        <h3 class="font-medium">{{ item.product_name or 'Product' }}</h3>
+        <p class="text-sm text-gray-500">Qty: {{ item.quantity }} × ${{ "%.2f"|format(item.unit_price) }}</p>
+      </div>
+      <p class="font-medium">${{ "%.2f"|format(item.total_price) }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Summary -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <h2 class="font-semibold mb-4">Summary</h2>
+    <div class="space-y-2">
+      <div class="flex justify-between"><span class="text-gray-600">Subtotal</span><span>${{ "%.2f"|format(order.total_amount) }}</span></div>
+      <div class="flex justify-between"><span class="text-gray-600">Shipping ({{ order.shipping_method or 'N/A' }})</span><span>${{ "%.2f"|format(order.shipping_cost) }}</span></div>
+      <div class="flex justify-between"><span class="text-gray-600">Tax</span><span>${{ "%.2f"|format(order.tax_amount) }}</span></div>
+      <div class="flex justify-between font-bold text-lg pt-2 border-t">
+        <span>Grand Total</span>
+        <span>${{ "%.2f"|format(order.grand_total) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shipping & Tracking -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+    <h2 class="font-semibold mb-4">Shipping</h2>
+    <p class="text-gray-600 whitespace-pre-line">{{ order.shipping_address }}</p>
+    {% if order.tracking_number %}
+    <p class="mt-2 text-sm"><span class="font-medium">Tracking:</span> {{ order.tracking_number }}</p>
+    {% endif %}
+  </div>
+
+  <!-- Status History -->
+  <div class="bg-white rounded-xl border border-gray-200 p-6">
+    <h2 class="font-semibold mb-4">Status History</h2>
+    {% for h in order.status_history %}
+    <div class="flex items-start gap-3 py-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-primary-500 mt-1.5"></span>
+      <div>
+        <p class="font-medium capitalize">{{ h.status }}</p>
+        {% if h.note %}<p class="text-sm text-gray-500">{{ h.note }}</p>{% endif %}
+        <p class="text-xs text-gray-400">{{ h.created_at.strftime('%b %d, %Y %I:%M %p') }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Return / Cancel -->
+  {% if order.status in ['pending','confirmed','processing'] %}
+  <div class="mt-6 flex gap-3">
+    <a href="/returns" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Request Return</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
