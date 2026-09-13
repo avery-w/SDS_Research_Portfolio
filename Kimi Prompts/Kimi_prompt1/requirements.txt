@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Marketplace - runtime requirements
+# Pinned to the versions verified on the development machine.
+# ---------------------------------------------------------------------------
+Flask==3.1.2
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+Flask-Limiter==3.12
+Flask-Mail==0.9.1
+SQLAlchemy==2.0.49
+WTForms==3.1.0
+Werkzeug==3.1.8
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+itsdangerous==2.2.0
+click==8.4.0
+blinker==1.9.0
+email-validator==2.1.0
+python-dotenv==1.0.1
+Pillow==12.3.0
+requests==2.32.3
+limits==5.8.0
+gunicorn==23.0.0
+
+# Optional: enables the LLM-backed chatbot. The rule engine works without it.
+openai==2.44.0
+
+# Test tooling
+pytest==8.4.2
