@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Marketplace{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="logo">Marketplace</a>
+      <nav class="nav">
+        <a href="/">Home</a>
+        <a href="#" onclick="showSection('products')">Products</a>
+        <a href="#" onclick="showSection('cart')">Cart</a>
+        <a href="#" onclick="showSection('orders')">Orders</a>
+        <a href="#" onclick="showSection('chat')">Chat</a>
+        <span id="auth-area">
+          <a href="#" onclick="showSection('login')">Login</a>
+          <a href="#" onclick="showSection('register')">Register</a>
+        </span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>Origin warehouse: 110 Inner Campus Drive, Austin, TX 78705 · Shipping calculated with UPS-style guidelines</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

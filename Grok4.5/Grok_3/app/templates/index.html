@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Austin Market{% endblock %}
+{% block content %}
+<section id="hero" class="hero">
+  <div class="hero-badge">Production multi-role marketplace</div>
+  <h1>Buy local. Sell global.<br/>From Austin.</h1>
+  <p>Customers shop · Sellers run stores · Admins govern the platform</p>
+  <div class="hero-actions">
+    <button class="btn primary" data-section="products">Browse Products</button>
+    <button class="btn ghost" data-section="register">Create Account</button>
+  </div>
+</section>
+
+<section id="section-products" class="section hidden">
+  <div class="section-head">
+    <h2>Products</h2>
+    <div class="search-bar">
+      <input type="search" id="search-q" placeholder="Search products…" maxlength="100" />
+      <button class="btn" id="btn-search">Search</button>
+    </div>
+  </div>
+  <div id="product-list" class="grid"></div>
+</section>
+
+<section id="section-cart" class="section hidden">
+  <h2>Your Cart</h2>
+  <div id="cart-list"></div>
+  <div id="cart-actions" class="checkout-panel hidden">
+    <h3>Checkout</h3>
+    <label>Shipping Address</label>
+    <textarea id="ship-address" rows="2" maxlength="500"></textarea>
+    <label>ZIP Code</label>
+    <input type="text" id="ship-zip" maxlength="10" placeholder="e.g. 10001" />
+    <button class="btn primary" id="btn-checkout">Place Order</button>
+    <pre id="ship-preview" class="hidden"></pre>
+  </div>
+</section>
+
+<section id="section-orders" class="section hidden">
+  <h2>Order History</h2>
+  <div id="order-list"></div>
+</section>
+
+<section id="section-chat" class="section hidden">
+  <h2>AI Assistant</h2>
+  <p class="hint">General help only. For product or order questions, message the seller in-app.</p>
+  <div id="chat-box" class="chat-box"></div>
+  <div class="chat-input">
+    <input type="text" id="chat-msg" placeholder="Ask anything…" maxlength="1000" />
+    <button class="btn primary" id="btn-chat">Send</button>
+  </div>
+</section>
+
+<section id="section-login" class="section hidden">
+  <div class="auth-card">
+    <h2>Welcome back</h2>
+    <form id="form-login">
+      <label>Email</label><input type="email" id="login-email" required />
+      <label>Password</label><input type="password" id="login-password" required />
+      <button class="btn primary full" type="submit">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<section id="section-register" class="section hidden">
+  <div class="auth-card">
+    <h2>Create account</h2>
+    <form id="form-register">
+      <label>Full Name</label><input type="text" id="reg-name" maxlength="255" />
+      <label>Email</label><input type="email" id="reg-email" required />
+      <label>Password (min 8)</label><input type="password" id="reg-password" required minlength="8" />
+      <label>I want to</label>
+      <select id="reg-role">
+        <option value="customer">Shop as Customer</option>
+        <option value="seller">Sell as Seller</option>
+      </select>
+      <button class="btn primary full" type="submit">Create Account</button>
+    </form>
+  </div>
+</section>
+
+<section id="section-seller" class="section hidden">
+  <h2>Seller Dashboard</h2>
+  <div id="seller-info" class="info-banner"></div>
+  <div class="two-col">
+    <div>
+      <h3>Add Product</h3>
+      <form id="product-form" class="form-card">
+        <input type="text" id="p-name" placeholder="Name" required maxlength="255" />
+        <textarea id="p-desc" placeholder="Description" rows="2"></textarea>
+        <div class="row">
+          <input type="number" id="p-price" placeholder="Price $" step="0.01" required min="0.01" />
+          <input type="number" id="p-inv" placeholder="Inventory" value="10" min="0" />
+        </div>
+        <div class="row">
+          <input type="number" id="p-weight" placeholder="Weight lb" value="1" step="0.1" min="0.1" />
+          <input type="file" id="p-image" accept="image/jpeg,image/png,image/webp,image/gif" />
+        </div>
+        <button class="btn primary full" type="submit">Publish</button>
+      </form>
+    </div>
+    <div>
+      <h3>My Products</h3>
+      <div id="seller-products" class="grid compact"></div>
+    </div>
+  </div>
+  <h3>Orders to Fulfill</h3>
+  <div id="seller-orders"></div>
+</section>
+
+<section id="section-admin" class="section hidden">
+  <h2>Admin Dashboard</h2>
+  <div id="admin-analytics" class="analytics"></div>
+  <h3>Users</h3>
+  <div id="admin-users" class="table-wrap"></div>
+  <h3>Recent Orders</h3>
+  <div id="admin-orders"></div>
+</section>
+{% endblock %}

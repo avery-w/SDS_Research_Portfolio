@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Austin Market{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="/" class="logo">Austin<span>Market</span></a>
+      <nav class="nav" id="main-nav">
+        <a href="#" data-section="products">Products</a>
+        <a href="#" data-section="cart">Cart</a>
+        <a href="#" data-section="orders">Orders</a>
+        <a href="#" data-section="chat">Assistant</a>
+        <span id="auth-area"></span>
+      </nav>
+    </div>
+  </header>
+  <main class="container" id="main">{% block content %}{% endblock %}</main>
+  <footer class="footer">
+    <div class="container">
+      Warehouse · 110 Inner Campus Drive, Austin, TX 78705 · Shipping via UPS-style rates
+    </div>
+  </footer>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

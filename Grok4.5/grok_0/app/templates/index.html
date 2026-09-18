@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Marketplace – Home{% endblock %}
+
+{% block content %}
+<section id="hero" class="hero">
+  <h1>Modern Multi-Role Marketplace</h1>
+  <p>Buy from independent sellers · Sell your products · Admin controls everything</p>
+  <div class="hero-actions">
+    <button class="btn primary" onclick="showSection('products')">Browse Products</button>
+    <button class="btn" onclick="showSection('register')">Create Account</button>
+  </div>
+</section>
+
+<!-- Products -->
+<section id="section-products" class="section hidden">
+  <h2>Products</h2>
+  <div class="search-bar">
+    <input type="text" id="search-q" placeholder="Search products..." />
+    <button class="btn" onclick="loadProducts()">Search</button>
+  </div>
+  <div id="product-list" class="grid"></div>
+</section>
+
+<!-- Cart -->
+<section id="section-cart" class="section hidden">
+  <h2>Your Cart</h2>
+  <div id="cart-list"></div>
+  <div id="cart-actions" class="hidden">
+    <h3>Checkout</h3>
+    <label>Shipping Address</label>
+    <textarea id="ship-address" rows="2" placeholder="Full address"></textarea>
+    <label>ZIP Code</label>
+    <input type="text" id="ship-zip" placeholder="e.g. 10001" />
+    <button class="btn primary" onclick="doCheckout()">Place Order</button>
+    <pre id="ship-preview"></pre>
+  </div>
+</section>
+
+<!-- Orders -->
+<section id="section-orders" class="section hidden">
+  <h2>Order History</h2>
+  <div id="order-list"></div>
+</section>
+
+<!-- Chat -->
+<section id="section-chat" class="section hidden">
+  <h2>AI Assistant</h2>
+  <p class="hint">I can answer general questions. For product or order specifics, message the seller directly.</p>
+  <div id="chat-box" class="chat-box"></div>
+  <div class="chat-input">
+    <input type="text" id="chat-msg" placeholder="Ask something..." onkeydown="if(event.key==='Enter')sendChat()" />
+    <button class="btn" onclick="sendChat()">Send</button>
+  </div>
+</section>
+
+<!-- Login -->
+<section id="section-login" class="section hidden">
+  <h2>Login</h2>
+  <form onsubmit="doLogin(event)">
+    <label>Email</label>
+    <input type="email" id="login-email" required />
+    <label>Password</label>
+    <input type="password" id="login-password" required />
+    <button class="btn primary" type="submit">Login</button>
+  </form>
+</section>
+
+<!-- Register -->
+<section id="section-register" class="section hidden">
+  <h2>Register</h2>
+  <form onsubmit="doRegister(event)">
+    <label>Full Name</label>
+    <input type="text" id="reg-name" />
+    <label>Email</label>
+    <input type="email" id="reg-email" required />
+    <label>Password</label>
+    <input type="password" id="reg-password" required minlength="6" />
+    <label>Role</label>
+    <select id="reg-role">
+      <option value="customer">Customer</option>
+      <option value="seller">Seller</option>
+    </select>
+    <button class="btn primary" type="submit">Create Account</button>
+  </form>
+</section>
+
+<!-- Seller Dashboard (shown after login as seller) -->
+<section id="section-seller" class="section hidden">
+  <h2>Seller Dashboard</h2>
+  <div id="seller-info"></div>
+  <h3>Add Product</h3>
+  <form id="product-form" onsubmit="createProduct(event)">
+    <input type="text" id="p-name" placeholder="Name" required />
+    <textarea id="p-desc" placeholder="Description"></textarea>
+    <input type="number" id="p-price" placeholder="Price" step="0.01" required />
+    <input type="number" id="p-inv" placeholder="Inventory" value="10" />
+    <input type="number" id="p-weight" placeholder="Weight (lb)" value="1" step="0.1" />
+    <input type="file" id="p-image" accept="image/*" />
+    <button class="btn primary" type="submit">Create Product</button>
+  </form>
+  <h3>My Products</h3>
+  <div id="seller-products" class="grid"></div>
+  <h3>My Orders</h3>
+  <div id="seller-orders"></div>
+</section>
+
+<!-- Admin Dashboard -->
+<section id="section-admin" class="section hidden">
+  <h2>Admin Dashboard</h2>
+  <div id="admin-analytics" class="analytics"></div>
+  <h3>Users</h3>
+  <div id="admin-users"></div>
+  <h3>All Orders</h3>
+  <div id="admin-orders"></div>
+</section>
+{% endblock %}
