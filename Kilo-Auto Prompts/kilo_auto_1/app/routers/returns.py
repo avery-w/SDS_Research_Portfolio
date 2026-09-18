@@ -14,7 +14,6 @@ from app.models import (
 )
 from app.schemas import ReturnCreate, ReturnRead, ReturnProcess
 from app.permissions import CustomerUser, SellerUser, AdminUser, get_current_user
-from app.security import get_current_user as _r
 
 router = APIRouter()
 
@@ -69,7 +68,7 @@ async def create_return(
                 detail="Return already requested for this item.",
             )
 
-    number = f"RET-{datetime.now(timezone.utc).strftime('%Y')}-{uuid().upper()}"
+    number = f"RET-{datetime.now(timezone.utc).strftime('%Y')}-{uuid.uuid4().hex[:8].upper()}"
     ret = ReturnRequest(
         return_number=number,
         order_id=payload.order_id,

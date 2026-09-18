@@ -12,8 +12,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.models import Cart, CartItem, Product
 from app.schemas import CartItemAdd, CartItemRead, CartRead, CartItemUpdate
-from app.permissions import CustomerUser, get_current_user
-from app.security import get_current_user as _c
+from app.permissions import CustomerUser
 
 router = APIRouter()
 

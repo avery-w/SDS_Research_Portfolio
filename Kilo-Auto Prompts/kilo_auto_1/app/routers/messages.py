@@ -18,8 +18,7 @@ from app.schemas import (
     MessageRead,
     MessageSend,
 )
-from app.permissions import CustomerUser, get_current_user, SellerUser
-from app.security import get_current_user as _m
+from app.permissions import CustomerUser, SellerUser
 
 router = APIRouter()
 

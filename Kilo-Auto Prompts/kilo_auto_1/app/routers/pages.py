@@ -5,6 +5,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Request, status
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models import Order, Product, Store, User, UserRole, PlatformSetting
@@ -24,7 +26,7 @@ def _context(request: Request, user: Optional[User] = None, **kwargs) -> dict:
 @router.get("/login")
 async def login_page(request: Request):
     return templates.TemplateResponse(
-        "auth/login.html", _context(request)
+        "auth/login.html", _context(request, flash=None)
     )
 
 
@@ -118,14 +120,21 @@ async def order_detail_page(
     user=Depends(get_current_user_optional),
     db: AsyncSession = Depends(get_db),
 ):
+    order = None
+    if user:
+        result = await db.execute(
+            select(Order).where(Order.id == order_id)
+        )
+        order = result.scalar_one_or_none()
     status_bg = {
         "pending": "yellow", "confirmed": "blue", "processing": "blue",
         "shipped": "indigo", "delivered": "green", "cancelled": "red",
         "returned": "gray", "refunded": "gray",
     }
+    bg = status_bg.get(order.status.value, "gray") if order else "gray"
     return templates.TemplateResponse(
         "customer/order_detail.html",
-        _context(request, user=user, status_bg=status_bg.get("", "gray")),
+        _context(request, user=user, order=order, status_bg=bg),
     )
 
 

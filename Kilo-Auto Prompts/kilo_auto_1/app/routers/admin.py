@@ -19,8 +19,7 @@ from app.schemas import (
     ProductRead,
     UserRead,
 )
-from app.permissions import AdminUser, get_current_user
-from app.security import get_current_user as _a
+from app.permissions import AdminUser
 
 router = APIRouter()
 

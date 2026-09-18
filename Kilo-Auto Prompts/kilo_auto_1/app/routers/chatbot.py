@@ -11,8 +11,7 @@ from app.database import get_db
 from app.models import ChatbotConversation, ChatbotMessage, User
 from app.schemas import ChatbotMessageCreate, ChatbotMessageRead
 from app.chatbot import chatbot_respond
-from app.permissions import get_current_user, role_required
-from app.security import get_current_user as _cb
+from app.permissions import get_current_user
 
 router = APIRouter()
 
@@ -77,7 +76,7 @@ async def chatbot_chat(
         conversation_id=conv.id, sender="bot", message=response["response"]
     )
     db.add(bot_msg)
-    conv.updated_at = conv.updated_at
+    conv.updated_at = datetime.now(timezone.utc)
     await db.commit()
 
     return ChatbotMessageRead(

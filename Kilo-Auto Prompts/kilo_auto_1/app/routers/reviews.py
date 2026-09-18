@@ -12,8 +12,7 @@ from sqlalchemy.orm import selectinload
 from app.database import get_db
 from app.models import Product, Review, User
 from app.schemas import ReviewCreate, ReviewRead
-from app.permissions import CustomerUser, get_current_user
-from app.security import get_current_user as _rv
+from app.permissions import CustomerUser
 
 router = APIRouter()
 

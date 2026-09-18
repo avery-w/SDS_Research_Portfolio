@@ -37,6 +37,7 @@ async def list_products(
         selectinload(Product.images),
         selectinload(Product.category),
         selectinload(Product.store),
+        selectinload(Product.reviews),
     )
     conditions = []
     if q:

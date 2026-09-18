@@ -19,8 +19,7 @@ from app.schemas import (
     ProductUpdate,
     SellerAnalytics,
 )
-from app.permissions import SellerUser, get_current_user
-from app.security import get_current_user as _s
+from app.permissions import SellerUser
 
 router = APIRouter()
 

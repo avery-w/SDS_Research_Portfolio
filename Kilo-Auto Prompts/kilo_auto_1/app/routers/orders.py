@@ -23,9 +23,8 @@ from app.schemas import (
     OrderStatusUpdate,
     CheckoutRequest,
 )
-from app.permissions import CustomerUser, get_current_user
-from app.shipping import calculate_ups_rates
-from app.security import get_current_user as _o
+from app.permissions import CustomerUser
+from app.routers.cart import _get_or_create_cart
 
 router = APIRouter()
 
@@ -39,7 +38,9 @@ async def checkout(
     db: AsyncSession = Depends(get_db),
 ):
     """Checkout the cart: create order with shipping rates (UPS), tax, total."""
-    # Get product details for all cart items
+    cart = await _get_or_create_cart(current_user, db)
+    if not cart.items:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cart is empty")
     product_ids = [ci.product_id for ci in cart.items]
     product_result = await db.execute(select(Product).where(Product.id.in_(product_ids)))
     products = {p.id: p for p in product_result.scalars().all()}
@@ -178,7 +179,7 @@ async def list_orders(
     if status_filter:
         stmt = stmt.where(Order.status == status_filter)
     stmt = stmt.order_by(desc(Order.created_at))
-    total = await db.execute(select(count_(stmt)))
+    total = await db.execute(count_(stmt))
     total = total.scalar() or 0
     offset = (page - 1) * per_page
     stmt = stmt.offset(offset).limit(per_page)

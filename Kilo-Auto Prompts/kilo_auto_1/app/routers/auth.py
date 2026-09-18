@@ -21,6 +21,7 @@ from app.schemas import (
     UserLogin,
     UserRead,
     UserRegister,
+    UserUpdate,
 )
 from app.security import (
     ACCESS_COOKIE,
@@ -33,7 +34,6 @@ from app.security import (
     set_auth_cookies,
     verify_password,
 )
-from app.security import get_current_user
 
 router = APIRouter()
 
@@ -108,8 +108,7 @@ async def login(
     await db.commit()
 
     if response is None:
-        from fastapi import Response as _R
-        response = _R()
+        response = Response()
     set_auth_cookies(response, access, refresh)
     return {
         "access_token": access,
@@ -131,14 +130,12 @@ async def me(
 # ── Update profile ─────────────────────────────
 @router.patch("/me", response_model=UserRead)
 async def update_profile(
-    payload: UserRegister,
+    payload: UserUpdate,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """Update profile fields."""
-    for field in UserRegister.model_fields:
-        if field == "password":
-            continue
+    for field in UserUpdate.model_fields:
         value = getattr(payload, field, None)
         if value is not None:
             setattr(current_user, field, value)
