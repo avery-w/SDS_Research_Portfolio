@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Messages · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>Messages</h1>
+<ul class="card plain threads">
+{% for t in threads %}
+  <li><a href="{{ url_for('shop.thread', user_id=t.user.id) }}">
+    <strong>{{ t.user.store.name if t.user.store else t.user.name }}</strong>
+    {% if t.unread %}<span class="badge">{{ t.unread }}</span>{% endif %}
+    <span class="muted">{{ t.last.body[:90] }}</span></a></li>
+{% else %}
+  <li class="empty">No conversations yet. Have a question about a product? Use “Message the seller” on its page.</li>
+{% endfor %}
+</ul>
+{% endblock %}

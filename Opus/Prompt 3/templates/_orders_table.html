@@ -1,0 +1,13 @@
+<table>
+  <tr><th>Order</th><th>Date</th><th>Store</th><th>Customer</th><th>Status</th><th>Total</th></tr>
+  {% for o in orders %}
+  <tr>
+    <td><a href="{{ url_for('shop.order_detail', order_id=o.id) }}">#{{ o.id }}</a></td>
+    <td>{{ o.created_at.strftime('%Y-%m-%d') }}</td>
+    <td>{{ o.store.name }}</td>
+    <td>{{ o.ship_name }}</td>
+    <td><span class="status {{ o.status }}">{{ o.status.replace('_', ' ') }}</span></td>
+    <td>{{ o.total_cents|money }}</td>
+  </tr>
+  {% else %}<tr><td colspan="6">No orders yet.</td></tr>{% endfor %}
+</table>

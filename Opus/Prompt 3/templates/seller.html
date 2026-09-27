@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ store.name if store else 'Open your store' }}</h1>
+{% if store %}
+<section class="stats">
+  <div class="card"><span class="muted">Orders</span><strong>{{ sales[0] }}</strong></div>
+  <div class="card"><span class="muted">Sales (before shipping)</span><strong>{{ sales[1]|money }}</strong></div>
+  <div class="card"><span class="muted">Products</span><strong>{{ products|length }}</strong></div>
+</section>
+{% if not store.active %}<p class="flash error">Your store was deactivated by an admin and is hidden from customers.</p>{% endif %}
+<h2>Products <a class="button" href="{{ url_for('seller.product_form') }}">Add product</a></h2>
+<table>
+  <tr><th>Name</th><th>Price</th><th>Stock</th><th>Listed</th><th></th></tr>
+  {% for p in products %}
+  <tr><td>{{ p.name }}</td><td>{{ p.price_cents|money }}</td>
+      <td {% if p.stock < 5 %}class="warn"{% endif %}>{{ p.stock }}</td><td>{{ 'yes' if p.active else 'no' }}</td>
+      <td><a href="{{ url_for('seller.product_form', product_id=p.id) }}">Edit</a></td></tr>
+  {% else %}<tr><td colspan="5">No products yet.</td></tr>{% endfor %}
+</table>
+<h2>Orders to fulfill</h2>
+{% include "_orders_table.html" %}
+{% endif %}
+<form method="post" class="card narrow">
+  <h2>Store settings</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Store name <input name="name" maxlength="100" required value="{{ store.name if store }}"></label>
+  <label>Description <textarea name="description" maxlength="2000">{{ store.description if store }}</textarea></label>
+  <button>Save store</button>
+</form>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, status, thumb, bar_chart with context %}
+{% block title %}{{ store.name }} · Seller dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><p class="eyebrow">Seller dashboard</p><h1>{{ store.name }}</h1></div>
+  <div class="row"><a class="btn btn-ghost" href="{{ url_for('index', store=store.id) }}">View storefront</a>
+    <a class="btn" href="{{ url_for('product_form') }}">+ New product</a></div>
+</div>
+{% if not store.is_active %}<div class="flash flash-error">Your store has been deactivated by an administrator and is hidden from shoppers.</div>{% endif %}
+
+<div class="kpis">
+  <div class="kpi"><span>Sales, 30 days</span><b>{{ stats.revenue|money }}</b><small>{{ stats.orders }} orders</small></div>
+  <div class="kpi"><span>Est. payout</span><b>{{ stats.payout|money }}</b><small>after {{ fee }}% platform fee</small></div>
+  <div class="kpi {{ 'attn' if stats.to_ship }}"><span>To ship</span><b>{{ stats.to_ship }}</b><small><a href="{{ url_for('seller', status='placed') }}#orders">view</a></small></div>
+  <div class="kpi {{ 'attn' if stats.returns }}"><span>Return requests</span><b>{{ stats.returns }}</b><small><a href="{{ url_for('seller', status='return_requested') }}#orders">review</a></small></div>
+  <div class="kpi"><span>Low stock</span><b>{{ stats.low_stock }}</b><small>3 or fewer left</small></div>
+</div>
+
+<section class="card">
+  <h3>Daily sales (items subtotal), last 30 days</h3>
+  {{ bar_chart(series, 'Daily sales for ' ~ store.name) }}
+</section>
+
+<section class="card" id="orders">
+  <div class="page-head"><h3>Orders</h3>
+    <form method="get" class="row"><select name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>{% for k, v in status_labels.items() %}<option value="{{ k }}" {{ 'selected' if k == status }}>{{ v }}</option>{% endfor %}
+    </select><button class="btn btn-ghost btn-sm">Filter</button></form></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Order</th><th>Customer</th><th>Placed</th><th class="num">Units</th><th class="num">Items</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for o in orders %}
+      <tr><td><a href="{{ url_for('order_detail', oid=o.id) }}">#{{ o.id }}</a></td><td>{{ o.customer_name }}</td><td>{{ o.created_at|dt }}</td>
+        <td class="num">{{ o.units }}</td><td class="num">{{ o.subtotal_cents|money }}</td><td>{{ status(o.status) }}</td></tr>
+    {% else %}<tr><td colspan="6" class="muted">No orders{{ ' with that status' if status }}.</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
+
+<section class="card">
+  <h3>Products &amp; inventory</h3>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th></th><th>Product</th><th class="num">Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for p in products %}
+      <tr class="{{ 'dim' if not p.is_active }}">
+        <td>{{ thumb(p, 'thumb-xs') }}</td>
+        <td><a href="{{ url_for('product', pid=p.id) }}">{{ p.name }}</a><div class="muted small">{{ p.category }}</div></td>
+        <td class="num">{{ p.price_cents|money }}</td>
+        <td><form method="post" action="{{ url_for('product_stock', pid=p.id) }}" class="row">{{ csrf() }}
+          <input class="qty-input" type="number" name="stock" min="0" max="100000" value="{{ p.stock }}" aria-label="Stock for {{ p.name }}">
+          <button class="btn btn-ghost btn-sm">Save</button></form></td>
+        <td>{{ 'Live' if p.is_active else 'Hidden' }}</td>
+        <td class="row"><a class="btn btn-ghost btn-sm" href="{{ url_for('product_form', pid=p.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('product_toggle', pid=p.id) }}">{{ csrf() }}<button class="btn btn-ghost btn-sm">{{ 'Hide' if p.is_active else 'Publish' }}</button></form></td>
+      </tr>
+    {% else %}<tr><td colspan="6" class="muted">No products yet. <a href="{{ url_for('product_form') }}">Add your first one.</a></td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
+
+<form method="post" action="{{ url_for('seller_store') }}" class="card stack">
+  {{ csrf() }}
+  <h3>Store profile</h3>
+  <label>Store name <input name="name" required maxlength="80" value="{{ store.name }}"></label>
+  <label>Description <textarea name="description" rows="3" maxlength="1000">{{ store.description }}</textarea></label>
+  <button class="btn btn-ghost">Save store</button>
+</form>
+{% endblock %}

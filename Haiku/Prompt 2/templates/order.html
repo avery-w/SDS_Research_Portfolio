@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status, csrf, thumb with context %}
+{% block title %}Order #{{ o.id }} · Forty Acres Market{% endblock %}
+{% block content %}
+<nav class="crumbs">
+  {% if role == 'customer' %}<a href="{{ url_for('orders') }}">Orders</a>{% elif role == 'seller' %}<a href="{{ url_for('seller') }}">My store</a>{% else %}<a href="{{ url_for('admin', tab='orders') }}">All orders</a>{% endif %}
+  / #{{ o.id }}
+</nav>
+<div class="page-head">
+  <h1>Order #{{ o.id }} {{ status(o.status) }}</h1>
+  <span class="muted">{{ o.checkout_ref }} · placed {{ o.created_at|dt }}</span>
+</div>
+
+<div class="checkout-layout">
+  <div class="stack">
+    <section class="card">
+      <h3>{{ o.store_name }}</h3>
+      {% for i in items %}
+        <div class="line">{{ thumb({'name': i.name, 'image': i.image}, 'thumb-sm') }}
+          <div class="grow"><a href="{{ url_for('product', pid=i.product_id) }}">{{ i.name }}</a><div class="muted small">{{ i.qty }} × {{ i.price_cents|money }}</div></div>
+          <b>{{ (i.qty * i.price_cents)|money }}</b></div>
+      {% endfor %}
+      <dl class="totals">
+        <dt>Items</dt><dd>{{ o.subtotal_cents|money }}</dd>
+        <dt>{{ o.ship_service }}</dt><dd>{{ o.shipping_cents|money if o.shipping_cents else 'Free' }}</dd>
+        <dt>Tax</dt><dd>{{ o.tax_cents|money }}</dd>
+        <dt class="grand">Total</dt><dd class="grand">{{ o.total_cents|money }}</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h3>Timeline</h3>
+      <ol class="timeline">
+        {% for e in events %}
+          <li><b>{{ status_labels.get(e.action, e.action)|capitalize }}</b>
+            <span class="muted small">{{ e.created_at }} UTC{% if e.actor_name %} · {{ e.actor_name }} ({{ e.actor_role }}){% endif %}</span>
+            {% if e.note %}<div class="small">{{ e.note }}</div>{% endif %}</li>
+        {% endfor %}
+      </ol>
+    </section>
+  </div>
+
+  <aside class="stack">
+    <section class="card">
+      <h3>Ship to</h3>
+      <p>{{ o.ship_name }}<br>{{ o.ship_street }}<br>{{ o.ship_city }}, {{ o.ship_state }} {{ o.ship_zip }}</p>
+      {% if o.tracking %}<p class="small">UPS tracking <code>{{ o.tracking }}</code></p>{% endif %}
+      {% if role != 'customer' %}<p class="small muted">Customer: {{ o.customer_name }} · {{ o.customer_email }}</p>{% endif %}
+      {% if o.return_reason %}<p class="small"><b>Return reason:</b> {{ o.return_reason }}</p>{% endif %}
+      {% if deadline and role == 'customer' and o.status == 'delivered' %}<p class="small muted">Return window closes {{ deadline.strftime('%b %-d, %Y') }}.</p>{% endif %}
+    </section>
+
+    {% for m in moves %}
+      <form method="post" action="{{ url_for('order_status', oid=o.id) }}" class="card stack"
+            {% if m == 'cancelled' %}data-confirm="Cancel this order? Items go back in stock."{% endif %}>
+        {{ csrf() }}<input type="hidden" name="status" value="{{ m }}">
+        {% if m == 'shipped' %}
+          <label>UPS tracking number <input name="tracking" maxlength="24" placeholder="1Z… (leave blank to generate a label)"></label>
+          <button class="btn">Mark shipped</button>
+        {% elif m == 'delivered' %}<button class="btn">Mark delivered</button>
+        {% elif m == 'cancelled' %}<button class="btn btn-danger">Cancel order</button>
+        {% elif m == 'return_requested' %}
+          <label>Why are you returning it? <textarea name="reason" rows="2" maxlength="500" required></textarea></label>
+          <button class="btn btn-ghost">Request a return</button>
+        {% elif m == 'returned' %}<button class="btn">Approve return (restock)</button>
+        {% elif m == 'return_rejected' %}<button class="btn btn-ghost">Reject return</button>{% endif %}
+      </form>
+    {% endfor %}
+
+    {% if role == 'admin' %}
+      <form method="post" action="{{ url_for('order_status', oid=o.id) }}" class="card stack override">
+        {{ csrf() }}
+        <h3>Admin override</h3>
+        <label>Set status
+          <select name="status">{% for k, v in status_labels.items() %}<option value="{{ k }}" {{ 'selected' if k == o.status }}>{{ v }}</option>{% endfor %}</select></label>
+        <label>Reason (logged) <input name="note" maxlength="500" required></label>
+        <input type="hidden" name="reason" value="Admin override">
+        <button class="btn btn-danger">Apply override</button>
+      </form>
+    {% endif %}
+
+    {% if role == 'customer' %}
+      <form method="post" action="{{ url_for('message_start') }}" class="card stack">
+        {{ csrf() }}<input type="hidden" name="store_id" value="{{ o.store_id }}"><input type="hidden" name="order_id" value="{{ o.id }}">
+        <h3>Need help with this order?</h3>
+        <textarea name="body" rows="3" maxlength="2000" required placeholder="Message {{ o.store_name }} about order #{{ o.id }}"></textarea>
+        <button class="btn btn-ghost">Message the seller</button>
+      </form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

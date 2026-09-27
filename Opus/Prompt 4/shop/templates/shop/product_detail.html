@@ -1,0 +1,20 @@
+{% extends "shop/base.html" %}
+{% block title %}{{ product.name }} · {{ site.site_name }}{% endblock %}
+{% block content %}
+<h1>{{ product.name }}</h1>
+<p>Sold by <a href="{% url 'store_detail' product.store.pk %}">{{ product.store.name }}</a></p>
+<div class="gallery">{% for i in product.images.all %}<img src="{{ i.image.url }}" alt="{{ product.name }}">{% endfor %}</div>
+<p class="price">${{ product.price }}</p>
+<p>{{ product.description|linebreaksbr }}</p>
+<p>{% if product.stock %}{{ product.stock }} in stock{% else %}Out of stock{% endif %} · {{ product.weight_lb }} lb · {{ product.length_in }}×{{ product.width_in }}×{{ product.height_in }} in</p>
+{% if product.stock %}
+<form method="post" action="{% url 'cart_set' product.pk %}">{% csrf_token %}
+  <input type="hidden" name="add" value="1">
+  <label>Qty <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"></label>
+  <button>Add to cart</button>
+</form>
+{% endif %}
+{% if user.is_authenticated and user != product.store.owner %}
+<p><a class="button" href="{% url 'thread' product.store.owner_id %}?product={{ product.pk }}">Message seller</a> Questions about this product? Ask the seller directly.</p>
+{% endif %}
+{% endblock %}

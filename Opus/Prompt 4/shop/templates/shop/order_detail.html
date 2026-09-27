@@ -1,0 +1,35 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>Order #{{ order.pk }}</h1>
+<p>Status: <strong>{{ order.get_status_display }}</strong>{% if order.tracking_number %} · UPS tracking {{ order.tracking_number }}{% endif %}</p>
+<p>{% if seller %}Customer: {{ order.customer.username }}{% else %}Seller: {{ order.store.name }}{% endif %} · Placed {{ order.created }}</p>
+<p>Ship to: {{ order.ship_name }}, {{ order.ship_line1 }}, {{ order.ship_city }}, {{ order.ship_state }} {{ order.ship_zip }} · {{ order.shipping_service }}</p>
+<table>
+<tr><th>Item</th><th>Price</th><th>Qty</th><th>Total</th></tr>
+{% for i in order.items.all %}<tr><td>{{ i.product_name }}</td><td>${{ i.unit_price }}</td><td>{{ i.quantity }}</td><td>${{ i.line_total }}</td></tr>{% endfor %}
+<tr><td colspan="3">Shipping</td><td>${{ order.shipping_cost }}</td></tr>
+<tr><th colspan="3">Total</th><th>${{ order.total }}</th></tr>
+</table>
+{% if order.return_reason %}<p>Return reason: {{ order.return_reason }}</p>{% endif %}
+
+{% if seller %}
+  <p><a class="button" href="{% url 'thread' order.customer_id %}?order={{ order.pk }}">Message customer</a></p>
+  {% if order.status == "placed" %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="ship">{{ ship_form.as_p }}<button>Mark shipped</button></form>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="danger">Cancel order (restocks)</button></form>
+  {% elif order.status == "shipped" %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="deliver"><button>Mark delivered</button></form>
+  {% elif order.status == "return_requested" %}
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="approve_return"><button>Approve return (restocks)</button></form>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="deny_return"><button class="danger">Deny return</button></form>
+  {% endif %}
+{% else %}
+  <p><a class="button" href="{% url 'thread' order.store.owner_id %}?order={{ order.pk }}">Message seller</a> Questions about this order? The seller can help.</p>
+  {% if order.status == "placed" %}
+  <form method="post" action="{% url 'order_cancel' order.pk %}">{% csrf_token %}<button class="danger">Cancel order</button></form>
+  {% elif order.status == "shipped" or order.status == "delivered" %}
+  <h2>Request a return</h2>
+  <form method="post" action="{% url 'order_return' order.pk %}">{% csrf_token %}{{ return_form.as_p }}<button>Request return</button></form>
+  {% endif %}
+{% endif %}
+{% endblock %}

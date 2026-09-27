@@ -1,0 +1,6 @@
+<label>Street <input name="street" maxlength="200" value="{{ a.street or '' }}"></label>
+<div class="row">
+  <label>City <input name="city" maxlength="100" value="{{ a.city or '' }}"></label>
+  <label>State <input name="state" maxlength="2" pattern="[A-Za-z]{2}" value="{{ a.state or '' }}"></label>
+  <label>ZIP <input name="zip" id="zip" maxlength="5" pattern="\d{5}" inputmode="numeric" value="{{ a.zip or '' }}"></label>
+</div>

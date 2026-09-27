@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Platform settings</h1>
+{% include "admin/_nav.html" %}
+<form method="post" class="card" style="max-width:640px">{{ m.csrf() }}
+  {% for key, (default, typ, label) in settings.items() %}
+    {{ m.field(key, label, setting(key), type='text' if typ.__name__ == 'str' else 'number', required=key != 'announcement', attrs='step="any" min="0"' if typ.__name__ != 'str' else 'maxlength="200"') }}
+  {% endfor %}
+  <p class="small muted">Shipping origin is fixed at 110 Inner Campus Drive, Austin, TX 78705. Fuel surcharge applies to UPS transport and accessorial charges.</p>
+  <button>Save settings</button>
+</form>
+{% endblock %}

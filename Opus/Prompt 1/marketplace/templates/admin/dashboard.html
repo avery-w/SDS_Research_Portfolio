@@ -1,0 +1,36 @@
+{% extends "base.html" %}{% from "_macros.html" import revenue_chart, status as status_badge %}
+{% block title %}Admin · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "admin/_nav.html" %}
+<h1>Sales analytics</h1>
+<div class="tiles">
+  <div class="tile"><span class="muted">Gross sales (incl. shipping)</span><strong>{{ stats.revenue_cents | money }}</strong></div>
+  <div class="tile"><span class="muted">Platform commission ({{ commission_pct | round(1) }}%)</span><strong>{{ commission_cents | money }}</strong></div>
+  <div class="tile"><span class="muted">Orders</span><strong>{{ stats.orders }}</strong></div>
+  <div class="tile"><span class="muted">Average order</span><strong>{{ stats.avg_order_cents | money }}</strong></div>
+  <div class="tile"><span class="muted">Units sold</span><strong>{{ stats.units }}</strong></div>
+</div>
+{{ revenue_chart(stats.daily, "Product sales, last 30 days") }}
+<div class="two-col">
+  <section class="card"><h2>Top products</h2>
+    <table><thead><tr><th>Product</th><th class="num">Units</th><th class="num">Sales</th></tr></thead><tbody>
+    {% for name, units, cents in stats.top_products %}<tr><td>{{ name }}</td><td class="num">{{ units }}</td><td class="num">{{ cents | money }}</td></tr>{% else %}<tr><td colspan="3" class="empty">No sales yet.</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+  <section class="card"><h2>Top stores</h2>
+    <table><thead><tr><th>Store</th><th class="num">Orders</th><th class="num">Sales</th></tr></thead><tbody>
+    {% for name, cents, n in top_stores %}<tr><td>{{ name }}</td><td class="num">{{ n }}</td><td class="num">{{ cents | money }}</td></tr>{% else %}<tr><td colspan="3" class="empty">No sales yet.</td></tr>{% endfor %}
+    </tbody></table>
+  </section>
+  <section class="card"><h2>Orders by status</h2>
+    <table><tbody>{% for s, n in stats.by_status.items() %}<tr><td>{{ status_badge(s) }}</td><td class="num">{{ n }}</td></tr>{% else %}<tr><td class="empty">No orders yet.</td></tr>{% endfor %}</tbody></table>
+  </section>
+  <section class="card"><h2>Platform</h2>
+    <table><tbody>
+      {% for role in ('customer', 'seller', 'admin') %}<tr><td>{{ role.title() }}s</td><td class="num">{{ counts.users.get(role, 0) }}</td></tr>{% endfor %}
+      <tr><td>Active stores</td><td class="num">{{ counts.stores }}</td></tr>
+      <tr><td>Active products</td><td class="num">{{ counts.products }}</td></tr>
+    </tbody></table>
+  </section>
+</div>
+{% endblock %}

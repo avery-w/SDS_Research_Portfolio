@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Cart · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>Your cart</h1>
+{% for store, lines in groups.items() %}
+<section class="card">
+  <h2>{{ store.name }}</h2>
+  <table>
+    <thead><tr><th>Product</th><th class="num">Price</th><th>Quantity</th><th class="num">Line total</th></tr></thead>
+    <tbody>
+    {% for p, qty in lines %}
+      <tr>
+        <td><a href="{{ url_for('shop.product', product_id=p.id) }}">{{ p.name }}</a></td>
+        <td class="num">{{ p.price_cents | money }}</td>
+        <td>
+          <form method="post" action="{{ url_for('shop.cart_set', product_id=p.id) }}" class="row">
+            {{ csrf() }}<input type="number" name="quantity" value="{{ qty }}" min="0" max="{{ p.stock }}" class="qty" aria-label="Quantity of {{ p.name }}">
+            <button class="btn secondary small">Update</button>
+          </form>
+        </td>
+        <td class="num">{{ (p.price_cents * qty) | money }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% else %}
+<p class="empty">Your cart is empty. <a href="{{ url_for('shop.index') }}">Keep shopping</a></p>
+{% endfor %}
+{% if groups %}
+<div class="summary"><span>Subtotal <strong>{{ subtotal | money }}</strong></span><a class="btn" href="{{ url_for('shop.checkout') }}">Checkout</a></div>
+{% endif %}
+{% endblock %}

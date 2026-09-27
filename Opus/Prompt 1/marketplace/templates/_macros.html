@@ -1,0 +1,41 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro product_card(p) %}
+<a class="card product-card" href="{{ url_for('shop.product', product_id=p.id) }}">
+  {% if p.image %}<img src="{{ url_for('static', filename='uploads/' ~ p.image) }}" alt="{{ p.name }}" loading="lazy">
+  {% else %}<div class="img-placeholder" aria-hidden="true">{{ p.name[:1] }}</div>{% endif %}
+  <div class="card-body">
+    <strong>{{ p.name }}</strong>
+    <span class="muted">{{ p.store.name }}</span>
+    <span class="price">{{ p.price_cents | money }}</span>
+  </div>
+</a>
+{% endmacro %}
+
+{% macro status(s) %}<span class="status status-{{ s }}">{{ s.replace('_', ' ') }}</span>{% endmacro %}
+
+{# Daily revenue bar chart: one series, so no legend; hover shows each day; the table is the accessible view. #}
+{% macro revenue_chart(daily, title) %}
+{% set peak = (daily | map(attribute=1) | max) or 1 %}
+<figure class="chart">
+  <figcaption>{{ title }} <span class="muted">· peak {{ peak | money }}</span></figcaption>
+  <svg viewBox="0 0 {{ daily | length * 20 }} 120" preserveAspectRatio="none" role="img" aria-label="{{ title }}">
+    <line class="grid" x1="0" x2="{{ daily | length * 20 }}" y1="10" y2="10" />
+    <line class="grid" x1="0" x2="{{ daily | length * 20 }}" y1="60" y2="60" />
+    <line class="axis" x1="0" x2="{{ daily | length * 20 }}" y1="110" y2="110" />
+    {% for day, cents in daily %}
+      {% set h = (cents / peak * 100) if cents else 0 %}
+      <g class="bar-hit"><title>{{ day }}: {{ cents | money }}</title>
+        <rect x="{{ loop.index0 * 20 }}" y="0" width="20" height="110" fill="transparent" />
+        {% if h %}<rect class="bar" x="{{ loop.index0 * 20 + 3 }}" y="{{ 110 - h }}" width="14" height="{{ h }}" rx="2" />{% endif %}
+      </g>
+    {% endfor %}
+  </svg>
+  <div class="chart-axis muted"><span>{{ daily[0][0] }}</span><span>{{ daily[-1][0] }}</span></div>
+  <details><summary>Show as table</summary>
+    <table><thead><tr><th>Day</th><th class="num">Revenue</th></tr></thead><tbody>
+    {% for day, cents in daily | reverse %}<tr><td>{{ day }}</td><td class="num">{{ cents | money }}</td></tr>{% endfor %}
+    </tbody></table>
+  </details>
+</figure>
+{% endmacro %}

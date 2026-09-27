@@ -1,0 +1,58 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro thumb(p, cls='thumb') -%}
+  {% if p.image %}<img class="{{ cls }}" src="{{ url_for('static', filename='uploads/' ~ p.image) }}" alt="{{ p.name }}" loading="lazy">
+  {% else %}<div class="{{ cls }} placeholder" style="--h: {{ (p.name|length * 37) % 360 }}" aria-hidden="true">{{ p.name[:1] }}</div>{% endif %}
+{%- endmacro %}
+
+{% macro status(s) -%}<span class="pill pill-{{ s }}">{{ status_labels[s] }}</span>{%- endmacro %}
+
+{# Single-series column chart: one hue, rounded data-ends, native tooltip per bar, table fallback. #}
+{% macro bar_chart(series, title) -%}
+  {% set w, h, pad_l, pad_b = 720, 220, 56, 24 %}
+  {% set peak = (series | map(attribute='cents') | max) or 1 %}
+  {% set band = (w - pad_l) / series|length %}
+  {% set bw = band - 2 %}
+  <figure class="chart">
+    <svg viewBox="0 0 {{ w }} {{ h }}" role="img" aria-label="{{ title }}">
+      {% for frac in [0, 0.5, 1] %}
+        {% set y = (h - pad_b) - frac * (h - pad_b - 12) %}
+        <line class="gridline" x1="{{ pad_l }}" x2="{{ w }}" y1="{{ y }}" y2="{{ y }}"/>
+        <text class="axis" x="{{ pad_l - 8 }}" y="{{ y + 4 }}" text-anchor="end">${{ '{:,.0f}'.format(peak * frac / 100) }}</text>
+      {% endfor %}
+      {% for d in series %}
+        {% set bh = (d.cents / peak) * (h - pad_b - 12) %}
+        {% set x = pad_l + loop.index0 * band + 1 %}
+        {% set base = h - pad_b %}
+        {% set r = [4, bh, bw / 2] | min %}
+        <g class="bar">
+          <rect class="hit" x="{{ x - 1 }}" y="0" width="{{ band }}" height="{{ base }}"/>
+          {% if bh > 0 %}
+          <path d="M{{ x }},{{ base }} V{{ base - bh + r }} Q{{ x }},{{ base - bh }} {{ x + r }},{{ base - bh }} H{{ x + bw - r }} Q{{ x + bw }},{{ base - bh }} {{ x + bw }},{{ base - bh + r }} V{{ base }} Z"/>
+          {% endif %}
+          <title>{{ d.label }}: {{ d.cents|money }} · {{ d.orders }} order{{ '' if d.orders == 1 else 's' }}</title>
+        </g>
+        {% if (loop.index0 % 7 == 0 and loop.revindex0 > 3) or loop.last %}
+          <text class="axis" x="{{ x + bw / 2 }}" y="{{ h - 6 }}" text-anchor="middle">{{ d.label }}</text>
+        {% endif %}
+      {% endfor %}
+    </svg>
+    <details class="table-view"><summary>View as table</summary>
+      <table class="table"><thead><tr><th>Day</th><th class="num">Orders</th><th class="num">Revenue</th></tr></thead>
+        <tbody>{% for d in series|reverse %}<tr><td>{{ d.label }}</td><td class="num">{{ d.orders }}</td><td class="num">{{ d.cents|money }}</td></tr>{% endfor %}</tbody>
+      </table>
+    </details>
+  </figure>
+{%- endmacro %}
+
+{# Horizontal bars for a ranked breakdown; value labels in text ink, bar carries magnitude only. #}
+{% macro hbars(rows, label_key, value_key, fmt='num') -%}
+  {% set peak = (rows | map(attribute=value_key) | max) or 1 %}
+  <ul class="hbars">
+    {% for r in rows %}
+      <li><span class="hb-label">{{ r[label_key] }}</span>
+        <span class="hb-track"><span class="hb-fill" style="width: {{ (100 * r[value_key] / peak) | round(1) }}%"></span></span>
+        <span class="hb-val">{{ r[value_key]|money if fmt == 'money' else r[value_key] }}</span></li>
+    {% else %}<li class="muted">No data yet.</li>{% endfor %}
+  </ul>
+{%- endmacro %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ other.store.name if other.store else other.name }}</h1>
+<div class="thread">
+  {% for m in msgs %}
+  <div class="msg {{ 'mine' if m.sender_id == current_user.id }}">
+    {% if m.product %}<a class="small" href="{{ url_for('shop.product', product_id=m.product.id) }}">Re: {{ m.product.name }}</a>{% endif %}
+    {% if m.order_id %}<a class="small" href="{{ url_for('shop.order_detail', order_id=m.order_id) }}">Re: order #{{ m.order_id }}</a>{% endif %}
+    <p class="pre">{{ m.body }}</p>
+    <span class="muted small">{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+  </div>
+  {% else %}<p class="muted">Start the conversation below.</p>{% endfor %}
+</div>
+{% if can_reply %}
+<form method="post" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if product %}<input type="hidden" name="product" value="{{ product.id }}"><p class="muted">About: {{ product.name }}</p>{% endif %}
+  {% if order %}<input type="hidden" name="order" value="{{ order.id }}"><p class="muted">About: order #{{ order.id }}</p>{% endif %}
+  <label>Message <textarea name="body" maxlength="2000" required></textarea></label>
+  <button>Send</button>
+</form>
+{% endif %}
+{% endblock %}

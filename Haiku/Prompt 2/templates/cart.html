@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "_macros.html" import thumb, csrf with context %}
+{% block title %}Cart · Forty Acres Market{% endblock %}
+{% block content %}
+<h1>Your cart</h1>
+{% if not groups %}
+  <section class="empty"><h2>Your cart is empty.</h2><p><a class="btn" href="{{ url_for('index') }}">Start shopping</a></p></section>
+{% else %}
+<div class="checkout-layout">
+  <div class="stack">
+    {% for sid, grp in groups.items() %}
+    <section class="card">
+      <h3 class="shipment-title">Shipment from {{ grp.store_name }}</h3>
+      {% for i in grp["items"] %}
+      <div class="line">
+        {{ thumb({'name': i.name, 'image': i.image}, 'thumb-sm') }}
+        <div class="grow"><a href="{{ url_for('product', pid=i.product_id) }}"><b>{{ i.name }}</b></a>
+          <div class="muted small">{{ i.price_cents|money }} each{% if not i.visible %} · <span class="error">no longer available</span>{% elif i.qty > i.stock %} · <span class="error">only {{ i.stock }} left</span>{% endif %}</div></div>
+        <form method="post" action="{{ url_for('cart_update') }}" class="row">
+          {{ csrf() }}<input type="hidden" name="product_id" value="{{ i.product_id }}">
+          <input class="qty-input" type="number" name="qty" value="{{ i.qty }}" min="0" max="99" aria-label="Quantity">
+          <button class="btn btn-ghost btn-sm">Update</button>
+        </form>
+        <form method="post" action="{{ url_for('cart_update') }}">
+          {{ csrf() }}<input type="hidden" name="product_id" value="{{ i.product_id }}"><input type="hidden" name="qty" value="0">
+          <button class="link" aria-label="Remove {{ i.name }}">Remove</button>
+        </form>
+        <b class="line-total">{{ (i.price_cents * i.qty)|money }}</b>
+      </div>
+      {% endfor %}
+    </section>
+    {% endfor %}
+  </div>
+
+  <form class="card stack checkout" id="checkout-form">
+    <h2>Checkout</h2>
+    <p class="muted small">Ships UPS from 110 Inner Campus Drive, Austin, TX 78705. Each store ships separately.</p>
+    <label>Recipient <input name="name" required maxlength="100" value="{{ g.user.name }}"></label>
+    <label>Street <input name="street" required maxlength="200" value="{{ g.user.street }}" autocomplete="street-address"></label>
+    <div class="row">
+      <label class="grow">City <input name="city" required maxlength="100" value="{{ g.user.city }}"></label>
+      <label>State <input name="state" required maxlength="2" size="3" value="{{ g.user.state }}" pattern="[A-Za-z]{2}"></label>
+      <label>ZIP <input name="zip" required maxlength="10" size="7" value="{{ g.user.zip }}" pattern="\d{5}(-\d{4})?" inputmode="numeric"></label>
+    </div>
+    <label class="check"><input type="checkbox" name="save_address" checked> Save as my default address</label>
+    <button type="button" class="btn btn-ghost" id="get-rates">Get UPS rates</button>
+    <div id="rates" class="rates" aria-live="polite"></div>
+    <dl class="totals">
+      <dt>Items</dt><dd id="t-sub" data-cents="{{ subtotal }}">{{ subtotal|money }}</dd>
+      <dt>Shipping</dt><dd id="t-ship">Enter ZIP</dd>
+      <dt>Tax ({{ settings.tax_rate_pct }}%)</dt><dd id="t-tax" data-rate="{{ settings.tax_rate_pct }}">…</dd>
+      <dt class="grand">Total</dt><dd class="grand" id="t-total">…</dd>
+    </dl>
+    <p class="muted small">Payment is simulated in this build. No card details are collected.</p>
+    <button class="btn btn-block" id="place-order" disabled>Place order</button>
+    <div id="checkout-error" class="flash flash-error" hidden></div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

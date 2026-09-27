@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Products · {{ site_name }}{% endblock %}
+{% block content %}
+{% set store = current_user.store %}{% include "seller/_nav.html" %}
+<div class="row spread"><h1>Products</h1><a class="btn" href="{{ url_for('seller.product_form') }}">Add product</a></div>
+<table class="card">
+  <thead><tr><th>Name</th><th>Category</th><th class="num">Price</th><th class="num">Stock</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for p in products %}
+    <tr><td>{{ p.name }}</td><td>{{ p.category }}</td><td class="num">{{ p.price_cents | money }}</td>
+      <td class="num">{{ p.stock }}</td><td>{{ 'Active' if p.active else 'Hidden' }}</td>
+      <td><a href="{{ url_for('seller.product_form', product_id=p.id) }}">Edit</a></td></tr>
+  {% else %}<tr><td colspan="6" class="empty">No products yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

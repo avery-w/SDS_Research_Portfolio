@@ -88,10 +88,9 @@ class User(TimestampMixin, UserMixin, db.Model):
     carts: Mapped[list["Cart"]] = relationship("Cart", back_populates="user")
     reviews: Mapped[list["Review"]] = relationship("Review", back_populates="author")
 
-    __table_args__ = (
-        Index("ix_users_role_status", "role", "status"),
-        Index("ix_users_created_at", "created_at"),
-    )
+    # ``created_at`` is already indexed by TimestampMixin, so only the
+    # composite access paths need naming here.
+    __table_args__ = (Index("ix_users_role_status", "role", "status"),)
 
     # -- identity ----------------------------------------------------------
     def get_id(self) -> str:

@@ -1,0 +1,10 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>Your orders</h1>
+<table>
+<tr><th>Order</th><th>Seller</th><th>Date</th><th>Status</th><th>Total</th></tr>
+{% for o in page %}<tr><td><a href="{% url 'order_detail' o.pk %}">#{{ o.pk }}</a></td><td>{{ o.store.name }}</td><td>{{ o.created|date }}</td><td>{{ o.get_status_display }}</td><td>${{ o.total }}</td></tr>
+{% empty %}<tr><td colspan="5">No orders yet.</td></tr>{% endfor %}
+</table>
+{% include "shop/pager.html" %}
+{% endblock %}

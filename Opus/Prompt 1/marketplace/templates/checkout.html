@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Checkout · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+<div class="two-col">
+  <form id="checkout-form" class="card form" data-subtotal="{{ subtotal }}"
+        data-rates-url="{{ url_for('api.shipping_rates') }}" data-checkout-url="{{ url_for('api.checkout') }}">
+    <h2>Ship to</h2>
+    <label>Full name <input name="name" required value="{{ current_user.name }}" autocomplete="name"></label>
+    <label>Street <input name="street" required value="{{ current_user.street }}" autocomplete="street-address"></label>
+    <div class="row">
+      <label>City <input name="city" required value="{{ current_user.city }}" autocomplete="address-level2"></label>
+      <label>State <input name="state" required maxlength="2" size="3" value="{{ current_user.state }}" autocomplete="address-level1"></label>
+      <label>ZIP <input name="zip" required pattern="\d{5}(-\d{4})?" size="10" value="{{ current_user.zip }}" autocomplete="postal-code"></label>
+    </div>
+    <button type="button" id="get-rates" class="btn secondary">Get UPS rates</button>
+    <fieldset id="rates" hidden><legend>Shipping from 110 Inner Campus Drive, Austin, TX 78705</legend></fieldset>
+    <p id="checkout-error" class="flash error" hidden role="alert"></p>
+    <button id="place-order" class="btn" disabled>Place order</button>
+  </form>
+  <aside class="card">
+    <h2>Order summary</h2>
+    {% for store, lines in groups.items() %}
+      <p class="muted">{{ store.name }} ships separately</p>
+      <ul class="plain">{% for p, qty in lines %}<li>{{ qty }} × {{ p.name }} <span class="num">{{ (p.price_cents * qty) | money }}</span></li>{% endfor %}</ul>
+    {% endfor %}
+    <p>Subtotal <strong class="num">{{ subtotal | money }}</strong></p>
+    <p>Shipping <strong class="num" id="shipping-amount">choose a service</strong></p>
+    <p class="total">Total <strong class="num" id="total-amount">{{ subtotal | money }}</strong></p>
+  </aside>
+</div>
+{% endblock %}

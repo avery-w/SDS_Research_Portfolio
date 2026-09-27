@@ -1,0 +1,174 @@
+.App {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+legend {
+  padding: 0 0.5rem;
+  font-weight: 500;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.product-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.detail-image {
+  width: 100%;
+  min-height: 400px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-info h1 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.detail-info .price {
+  font-size: 2rem;
+  color: #28a745;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.detail-info .store {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.detail-info .rating {
+  color: #ffc107;
+  margin: 0.5rem 0;
+}
+
+.detail-info .description {
+  color: #555;
+  line-height: 1.6;
+  margin: 1rem 0;
+}
+
+.add-to-cart {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.add-to-cart input {
+  width: 80px;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-to-cart button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.add-to-cart button:hover {
+  background: #0056b3;
+}
+
+.reviews-section,
+.chatbot-section {
+  margin-top: 2rem;
+  border-top: 2px solid #eee;
+  padding-top: 2rem;
+}
+
+.review {
+  border: 1px solid #eee;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.review p {
+  margin: 0.5rem 0;
+}
+
+.chatbot-section form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chatbot-section input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.chatbot-section button {
+  padding: 0.75rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chat-response {
+  background: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .product-detail {
+    grid-template-columns: 1fr;
+  }
+
+  .add-to-cart {
+    flex-direction: column;
+  }
+
+  .add-to-cart input {
+    width: 100%;
+  }
+}

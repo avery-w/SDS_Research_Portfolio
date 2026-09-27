@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, status, bar_chart, hbars with context %}
+{% block title %}Admin · Forty Acres Market{% endblock %}
+{% block content %}
+<div class="page-head"><div><p class="eyebrow">Platform admin</p><h1>{{ tab|capitalize }}</h1></div></div>
+<nav class="tabs">
+  {% for t in ['analytics', 'users', 'stores', 'products', 'orders', 'settings', 'activity'] %}
+    <a href="{{ url_for('admin', tab=t) }}" class="{{ 'active' if t == tab }}">{{ t|capitalize }}</a>
+  {% endfor %}
+</nav>
+
+{% if tab in ['users', 'stores', 'products', 'orders'] %}
+<form method="get" class="filters">
+  <input type="hidden" name="tab" value="{{ tab }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search {{ tab }}" maxlength="100">
+  {% if tab == 'orders' %}
+    <select name="status"><option value="">All statuses</option>{% for k, v in status_labels.items() %}<option value="{{ k }}" {{ 'selected' if k == status }}>{{ v }}</option>{% endfor %}</select>
+  {% endif %}
+  <button class="btn btn-sm">Search</button>
+</form>
+{% endif %}
+
+{% if tab == 'analytics' %}
+  <div class="kpis">
+    <div class="kpi"><span>GMV, 30 days</span><b>{{ kpis.gmv|money }}</b><small>incl. shipping &amp; tax</small></div>
+    <div class="kpi"><span>Orders</span><b>{{ kpis.orders }}</b><small>AOV {{ kpis.aov|money }}</small></div>
+    <div class="kpi"><span>Platform fees</span><b>{{ kpis.fees|money }}</b><small>{{ settings.platform_fee_pct }}% of item sales</small></div>
+    <div class="kpi"><span>Return rate</span><b>{{ kpis.return_rate }}%</b><small>requested or returned</small></div>
+    <div class="kpi"><span>Active accounts</span><b>{{ kpis.customers }}</b><small>customers · {{ kpis.sellers }} sellers</small></div>
+    <div class="kpi"><span>Live products</span><b>{{ kpis.live_products }}</b><small>visible to shoppers</small></div>
+  </div>
+  <section class="card"><h3>Gross merchandise value per day, last 30 days</h3>{{ bar_chart(series, 'Daily GMV, last 30 days') }}</section>
+  <div class="two-col">
+    <section class="card"><h3>Orders by status (all time)</h3>
+      <ul class="hbars">
+        {% set peak = (by_status | map(attribute='n') | max) or 1 %}
+        {% for r in by_status %}
+          <li><span class="hb-label">{{ status_labels[r.status] }}</span><span class="hb-track"><span class="hb-fill" style="width: {{ (100 * r.n / peak)|round(1) }}%"></span></span><span class="hb-val">{{ r.n }}</span></li>
+        {% else %}<li class="muted">No orders yet.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="card"><h3>Item sales by category, 30 days</h3>{{ hbars(by_category, 'category', 'revenue', 'money') }}</section>
+  </div>
+  <div class="two-col">
+    <section class="card"><h3>Top stores, 30 days</h3>
+      <table class="table"><thead><tr><th>Store</th><th class="num">Orders</th><th class="num">Item sales</th></tr></thead><tbody>
+      {% for s in top_stores %}<tr><td><a href="{{ url_for('index', store=s.id) }}">{{ s.name }}</a></td><td class="num">{{ s.orders }}</td><td class="num">{{ s.revenue|money }}</td></tr>
+      {% else %}<tr><td colspan="3" class="muted">No sales yet.</td></tr>{% endfor %}</tbody></table></section>
+    <section class="card"><h3>Top products, 30 days</h3>
+      <table class="table"><thead><tr><th>Product</th><th class="num">Units</th><th class="num">Sales</th></tr></thead><tbody>
+      {% for p in top_products %}<tr><td><a href="{{ url_for('product', pid=p.id) }}">{{ p.name }}</a><div class="muted small">{{ p.store_name }}</div></td><td class="num">{{ p.units }}</td><td class="num">{{ p.revenue|money }}</td></tr>
+      {% else %}<tr><td colspan="3" class="muted">No sales yet.</td></tr>{% endfor %}</tbody></table></section>
+  </div>
+
+{% elif tab == 'users' %}
+  <div class="table-wrap card"><table class="table">
+    <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
+    {% for u in rows %}
+      <tr class="{{ 'dim' if not u.is_active }}">
+        <td><b>{{ u.name }}</b><div class="muted small">{{ u.email }}{% if u.store_name %} · {{ u.store_name }}{% endif %}</div></td>
+        <td>{% if u.id != g.user.id %}<form method="post" action="{{ url_for('admin_user', uid=u.id) }}" class="row">{{ csrf() }}
+            <input type="hidden" name="action" value="set_role">
+            <select name="role" aria-label="Role for {{ u.email }}">{% for r in ['customer', 'seller', 'admin'] %}<option {{ 'selected' if r == u.role }}>{{ r }}</option>{% endfor %}</select>
+            <button class="btn btn-ghost btn-sm">Set</button></form>{% else %}{{ u.role }} (you){% endif %}</td>
+        <td>{{ 'Active' if u.is_active else 'Deactivated' }}</td>
+        <td>{{ u.created_at|dt }}</td>
+        <td>{% if u.id != g.user.id %}<form method="post" action="{{ url_for('admin_user', uid=u.id) }}" {% if u.is_active %}data-confirm="Deactivate {{ u.email }}? They'll be signed out immediately."{% endif %}>{{ csrf() }}
+            <input type="hidden" name="action" value="{{ 'deactivate' if u.is_active else 'activate' }}">
+            <button class="btn btn-sm {{ 'btn-danger' if u.is_active else '' }}">{{ 'Deactivate' if u.is_active else 'Reactivate' }}</button></form>{% endif %}</td>
+      </tr>
+    {% endfor %}</tbody></table></div>
+
+{% elif tab == 'stores' %}
+  <div class="table-wrap card"><table class="table">
+    <thead><tr><th>Store</th><th>Seller</th><th class="num">Products</th><th>Status</th><th></th></tr></thead><tbody>
+    {% for s in rows %}
+      <tr class="{{ 'dim' if not s.is_active }}"><td><a href="{{ url_for('index', store=s.id) }}">{{ s.name }}</a></td>
+        <td>{{ s.seller_name }}<div class="muted small">{{ s.seller_email }}{{ ' · seller deactivated' if not s.seller_active }}</div></td>
+        <td class="num">{{ s.products }}</td><td>{{ 'Active' if s.is_active else 'Deactivated' }}</td>
+        <td><form method="post" action="{{ url_for('admin_store', sid=s.id) }}">{{ csrf() }}
+          <input type="hidden" name="action" value="{{ 'deactivate' if s.is_active else 'activate' }}">
+          <button class="btn btn-sm {{ 'btn-danger' if s.is_active }}">{{ 'Deactivate' if s.is_active else 'Reactivate' }}</button></form></td></tr>
+    {% endfor %}</tbody></table></div>
+
+{% elif tab == 'products' %}
+  <div class="table-wrap card"><table class="table">
+    <thead><tr><th>Product</th><th>Store</th><th class="num">Price</th><th class="num">Stock</th><th>Visible</th><th></th></tr></thead><tbody>
+    {% for p in rows %}
+      <tr class="{{ 'dim' if not p.visible }}"><td><a href="{{ url_for('product', pid=p.id) }}">{{ p.name }}</a></td><td>{{ p.store_name }}</td>
+        <td class="num">{{ p.price_cents|money }}</td><td class="num">{{ p.stock }}</td>
+        <td>{{ 'Yes' if p.visible else ('Hidden' if not p.is_active else 'Store/seller off') }}</td>
+        <td class="row"><a class="btn btn-ghost btn-sm" href="{{ url_for('product_form', pid=p.id) }}">Edit</a>
+          <form method="post" action="{{ url_for('product_toggle', pid=p.id) }}">{{ csrf() }}<button class="btn btn-sm {{ 'btn-danger' if p.is_active }}">{{ 'Deactivate' if p.is_active else 'Activate' }}</button></form></td></tr>
+    {% endfor %}</tbody></table></div>
+
+{% elif tab == 'orders' %}
+  <div class="table-wrap card"><table class="table">
+    <thead><tr><th>Order</th><th>Customer</th><th>Store</th><th>Placed</th><th class="num">Total</th><th>Status</th></tr></thead><tbody>
+    {% for o in rows %}
+      <tr><td><a href="{{ url_for('order_detail', oid=o.id) }}">#{{ o.id }}</a><div class="muted small">{{ o.checkout_ref }}</div></td><td>{{ o.customer_name }}</td>
+        <td>{{ o.store_name }}</td><td>{{ o.created_at|dt }}</td><td class="num">{{ o.total_cents|money }}</td><td>{{ status(o.status) }}</td></tr>
+    {% else %}<tr><td colspan="6" class="muted">No orders found.</td></tr>{% endfor %}</tbody></table></div>
+  <p class="muted small">Open an order to override its status (cancel, force a return, reopen). Overrides are logged with a reason.</p>
+
+{% elif tab == 'settings' %}
+  <form method="post" action="{{ url_for('admin_settings') }}" class="card stack form-wide">
+    {{ csrf() }}
+    <div class="row">
+      <label>Sales tax (%) <input type="number" name="tax_rate_pct" step="0.01" min="0" max="25" value="{{ settings.tax_rate_pct }}" required></label>
+      <label>Platform fee (%) <input type="number" name="platform_fee_pct" step="0.1" min="0" max="50" value="{{ settings.platform_fee_pct }}" required></label>
+      <label>Return window (days) <input type="number" name="return_window_days" min="0" max="365" value="{{ settings.return_window_days }}" required></label>
+    </div>
+    <fieldset class="row"><legend>UPS shipping (origin 110 Inner Campus Drive, Austin, TX 78705)</legend>
+      <label>Fuel surcharge (%) <input type="number" name="fuel_surcharge_pct" step="0.1" min="0" max="50" value="{{ settings.fuel_surcharge_pct }}" required></label>
+      <label>Residential surcharge ($/pkg) <input type="number" name="residential_fee" step="0.01" min="0" max="50" value="{{ settings.residential_fee }}" required></label>
+      <label>Free Ground over ($, 0 = off) <input type="number" name="free_ground_over" step="0.01" min="0" max="10000" value="{{ settings.free_ground_over }}" required></label>
+    </fieldset>
+    <label>Site-wide announcement banner <input name="banner" maxlength="200" value="{{ settings.banner }}" placeholder="e.g. Free Ground shipping this weekend!"></label>
+    <button class="btn">Save settings</button>
+  </form>
+
+{% elif tab == 'activity' %}
+  <div class="table-wrap card"><table class="table">
+    <thead><tr><th>When (UTC)</th><th>Who</th><th>What</th><th>Details</th></tr></thead><tbody>
+    {% for e in rows %}
+      <tr><td class="small">{{ e.created_at }}</td><td>{{ e.actor_name or 'System' }}</td>
+        <td>{% if e.entity == 'order' %}<a href="{{ url_for('order_detail', oid=e.entity_id) }}">Order #{{ e.entity_id }}</a>{% else %}{{ e.entity|capitalize }} #{{ e.entity_id }}{% endif %} · {{ e.action|replace('_', ' ') }}</td>
+        <td class="small">{{ e.note }}</td></tr>
+    {% endfor %}</tbody></table></div>
+{% endif %}
+{% endblock %}

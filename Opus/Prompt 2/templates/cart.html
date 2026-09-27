@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Your cart</h1>
+{% if not lines %}
+<div class="empty card"><div class="icon">🛒</div><p>Your cart is empty.</p><a class="btn" href="{{ url_for('shop.products') }}">Browse products</a></div>
+{% else %}
+{% set ns = namespace(sub=0, issues=0) %}
+<div class="grid split" style="align-items:start">
+  <div class="card table-wrap"><table>
+    <tr><th>Item</th><th>Qty</th><th class="num">Total</th></tr>
+    {% for c in lines %}{% set p = c.product %}{% set ns.sub = ns.sub + p.price_cents * c.qty %}
+    <tr><td><div class="row"><div style="width:56px">{{ m.thumb(p) }}</div><div><a href="{{ url_for('shop.product', pid=p.id) }}"><strong>{{ p.name }}</strong></a><br>
+        <span class="small muted">{{ p.store.name }} · {{ money(p.price_cents) }}</span>
+        {% if not p.purchasable %}{% set ns.issues = ns.issues + 1 %}<br><span class="badge bad">No longer available</span>
+        {% elif c.qty > p.stock %}{% set ns.issues = ns.issues + 1 %}<br><span class="badge bad">Only {{ p.stock }} left</span>{% endif %}</div></div></td>
+      <td><form method="post" action="{{ url_for('shop.cart_update', pid=p.id) }}" class="inline">{{ m.csrf() }}
+          <input name="qty" type="number" min="0" max="99" value="{{ c.qty }}" style="width:70px" aria-label="Quantity"><button class="ghost sm">Update</button></form>
+        <form method="post" action="{{ url_for('shop.cart_update', pid=p.id) }}" class="inline">{{ m.csrf() }}<input type="hidden" name="qty" value="0"><button class="linkish small">Remove</button></form></td>
+      <td class="num">{{ money(p.price_cents * c.qty) }}</td></tr>
+    {% endfor %}
+  </table></div>
+  <aside class="card"><h2>Summary</h2>
+    <table class="totals"><tr><td>Subtotal</td><td class="num">{{ money(ns.sub) }}</td></tr>
+      <tr><td>UPS shipping</td><td class="num muted">at checkout</td></tr></table>
+    {% if setting('free_shipping_over') and ns.sub < setting('free_shipping_over') * 100 %}
+      <p class="small muted">Add {{ money(setting('free_shipping_over') * 100 - ns.sub) }} more for free UPS Ground.</p>{% endif %}
+    {% if ns.issues %}<p class="badge bad">Fix the highlighted items to continue.</p>
+    {% else %}<a class="btn block" href="{{ url_for('shop.checkout') }}">Checkout</a>{% endif %}
+  </aside>
+</div>
+{% endif %}
+{% endblock %}

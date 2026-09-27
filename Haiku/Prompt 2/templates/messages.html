@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Messages · Forty Acres Market{% endblock %}
+{% block content %}
+<h1>Messages</h1>
+<div class="inbox">
+  <nav class="card conv-list">
+    {% for c in convs %}
+      <a class="conv {{ 'active' if conv and conv.id == c.id }}" href="{{ url_for('thread', cid=c.id) }}">
+        <b>{{ c.customer_name if g.user.role == 'seller' else (c.store_name if g.user.role == 'customer' else c.customer_name ~ ' ↔ ' ~ c.store_name) }}</b>
+        {% if c.unread_count %}<span class="badge">{{ c.unread_count }}</span>{% endif %}
+        <span class="muted small clamp">{{ c.last_body }}</span>
+      </a>
+    {% else %}
+      <p class="muted">No conversations yet.{% if g.user.role == 'customer' %} Message a seller from any product or order page.{% endif %}</p>
+    {% endfor %}
+  </nav>
+  <section class="card thread">
+    {% if conv %}
+      <header class="thread-head"><b>{{ conv.store_name }}</b> <span class="muted">with {{ conv.customer_name }}</span>
+        {% if g.user.role == 'admin' %}<span class="pill">Moderator view</span>{% endif %}</header>
+      <div class="bubbles">
+        {% for m in msgs %}
+          <div class="bubble {{ 'mine' if m.sender_id == g.user.id }}" {% if loop.last %}id="latest"{% endif %}>
+            <div class="small muted">{{ m.sender_name }}{% if m.sender_role == 'admin' %} (Marketplace support){% endif %} · {{ m.created_at }} UTC</div>
+            {% if m.product_name %}<a class="small" href="{{ url_for('product', pid=m.product_id) }}">Re: {{ m.product_name }}</a>{% endif %}
+            {% if m.order_id %}<a class="small" href="{{ url_for('order_detail', oid=m.order_id) }}">Re: order #{{ m.order_id }}</a>{% endif %}
+            <p>{{ m.body }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      <form method="post" action="{{ url_for('thread', cid=conv.id) }}" class="row reply">
+        {{ csrf() }}
+        <textarea name="body" rows="2" maxlength="2000" required placeholder="Write a reply…" class="grow"></textarea>
+        <button class="btn">Send</button>
+      </form>
+    {% else %}
+      <p class="muted center">Select a conversation.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

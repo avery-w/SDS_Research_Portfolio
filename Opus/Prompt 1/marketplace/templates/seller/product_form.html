@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}{{ 'Edit' if p.id else 'New' }} product · {{ site_name }}{% endblock %}
+{% block content %}
+{% set v = form or {} %}
+<form method="post" enctype="multipart/form-data" class="card form narrow">
+  <h1>{{ 'Edit ' ~ p.name if p.id else 'New product' }}</h1>{{ csrf() }}
+  <label>Name <input name="name" required value="{{ v.name or p.name or '' }}"></label>
+  <label>Description <textarea name="description" rows="4">{{ v.description or p.description or '' }}</textarea></label>
+  <div class="row">
+    <label>Category <input name="category" value="{{ v.category or p.category or 'General' }}"></label>
+    <label>Price ($) <input name="price" required inputmode="decimal" value="{{ v.price or ('%.2f' % (p.price_cents / 100) if p.price_cents is not none else '') }}"></label>
+    <label>Stock <input type="number" name="stock" min="0" required value="{{ v.stock or p.stock or 0 }}"></label>
+  </div>
+  <fieldset><legend>Package for UPS rating</legend>
+    <div class="row">
+      <label>Weight (lb) <input type="number" step="0.1" min="0.1" name="weight_lb" required value="{{ v.weight_lb or p.weight_lb or 1 }}"></label>
+      <label>Length (in) <input type="number" step="0.1" min="0.1" name="length_in" required value="{{ v.length_in or p.length_in or 10 }}"></label>
+      <label>Width (in) <input type="number" step="0.1" min="0.1" name="width_in" required value="{{ v.width_in or p.width_in or 8 }}"></label>
+      <label>Height (in) <input type="number" step="0.1" min="0.1" name="height_in" required value="{{ v.height_in or p.height_in or 4 }}"></label>
+    </div>
+  </fieldset>
+  {% if p.image %}<img class="thumb" src="{{ url_for('static', filename='uploads/' ~ p.image) }}" alt="Current image">{% endif %}
+  <label>Image (PNG, JPEG, GIF or WebP, up to 5 MB) <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+  <label class="check"><input type="checkbox" name="active" value="1" {% if (form and v.active) or (not form and p.active is not false) %}checked{% endif %}> Listed in the shop</label>
+  <button class="btn">Save product</button>
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Products</h1>
+{% include "admin/_nav.html" %}
+<form class="row" style="margin-bottom:12px"><input name="q" value="{{ request.args.get('q', '') }}" placeholder="Search products or stores" style="flex:1;width:auto"><button class="ghost">Search</button></form>
+<div class="card table-wrap"><table>
+  <tr><th>Product</th><th>Store</th><th class="num">Price</th><th class="num">Stock</th><th>Status</th><th></th></tr>
+  {% for p in page.items %}
+  <tr><td><strong>{{ p.name }}</strong><br><span class="small muted">#{{ p.id }} · {{ p.category }}</span></td><td>{{ p.store.name }}</td>
+    <td class="num">{{ money(p.price_cents) }}</td><td class="num">{{ p.stock }}</td>
+    <td>{% if p.locked %}<span class="badge bad">Taken down</span>{% elif p.is_active %}<span class="badge ok">Listed</span>{% else %}<span class="badge">Unlisted by seller</span>{% endif %}</td>
+    <td class="right"><form method="post" action="{{ url_for('admin.toggle_product', pid=p.id) }}" data-confirm="{{ 'Take down' if p.is_active else 'Reinstate' }} {{ p.name }}?">{{ m.csrf() }}<input type="hidden" name="next" value="{{ request.full_path }}">
+      <button class="sm {{ 'danger' if p.is_active else 'ghost' }}">{{ 'Take down' if p.is_active else 'Reinstate' }}</button></form></td></tr>
+  {% endfor %}
+</table></div>
+{{ m.pager(page, 'admin.products') }}
+{% endblock %}

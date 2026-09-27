@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<div class="card" style="max-width:440px;margin:24px auto">
+  {% if mode == 'login' %}
+    <h1>Welcome back</h1>
+    <form method="post">{{ m.csrf() }}
+      {{ m.field('email', 'Email', type='email', attrs='autocomplete="email"') }}
+      <div class="field"><label for="pw">Password</label><input id="pw" name="password" type="password" required autocomplete="current-password"></div>
+      <button class="block">Sign in</button>
+    </form>
+    <p class="small muted">New here? <a href="{{ url_for('shop.register') }}">Create an account</a></p>
+    <details class="small muted"><summary>Demo accounts</summary>
+      <p>admin@longhorn.market · seller1@longhorn.market · customer@longhorn.market<br>Password for all: <code>password123</code></p></details>
+  {% else %}
+    <h1>Create your account</h1>
+    <form method="post">{{ m.csrf() }}
+      {{ m.field('name', 'Full name', attrs='autocomplete="name" maxlength="100"') }}
+      {{ m.field('email', 'Email', type='email', attrs='autocomplete="email"') }}
+      <div class="field"><label for="pw">Password</label><input id="pw" name="password" type="password" minlength="8" required autocomplete="new-password"><div class="hint">At least 8 characters.</div></div>
+      <div class="field"><label>I want to…</label>
+        <label class="shipopt"><input type="radio" name="role" value="customer" {{ 'checked' if old('role', 'customer') == 'customer' }}> <span class="grow">Shop</span></label>
+        {% if setting('allow_seller_signup') %}<label class="shipopt"><input type="radio" name="role" value="seller" {{ 'checked' if old('role') == 'seller' }}> <span class="grow">Open a store and sell</span></label>{% endif %}
+      </div>
+      <button class="block">Create account</button>
+    </form>
+    <p class="small muted">Already have an account? <a href="{{ url_for('shop.login') }}">Sign in</a></p>
+  {% endif %}
+</div>
+{% endblock %}

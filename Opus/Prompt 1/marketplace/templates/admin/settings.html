@@ -1,0 +1,12 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Settings · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "admin/_nav.html" %}
+<form method="post" class="card form narrow">
+  <h1>Platform settings</h1>{{ csrf() }}
+  <label>Site name <input name="site_name" value="{{ values.site_name }}" required></label>
+  <label>Commission (%) <input type="number" name="commission_pct" min="0" max="100" step="0.1" value="{{ values.commission_pct }}"></label>
+  <label>Announcement banner <input name="announcement" value="{{ values.announcement }}" placeholder="Shown at the top of every page"></label>
+  <button class="btn">Save settings</button>
+</form>
+{% endblock %}

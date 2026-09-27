@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Order #{{ o.id }} <span class="status {{ o.status }}">{{ o.status.replace('_', ' ') }}</span></h1>
+<p class="muted">{{ o.created_at.strftime('%Y-%m-%d %H:%M') }} UTC · {{ o.store.name }} · {{ o.customer.email if role != 'customer' }}</p>
+<table>
+  <tr><th>Item</th><th>Price</th><th>Qty</th><th></th></tr>
+  {% for i in o.items %}<tr><td>{{ i.name }}</td><td>{{ i.price_cents|money }}</td><td>{{ i.quantity }}</td><td>{{ (i.price_cents * i.quantity)|money }}</td></tr>{% endfor %}
+  <tr><td colspan="3">Subtotal</td><td>{{ o.subtotal_cents|money }}</td></tr>
+  <tr><td colspan="3">Shipping ({{ o.ship_service }})</td><td>{{ o.shipping_cents|money }}</td></tr>
+  <tr><th colspan="3">Total</th><th>{{ o.total_cents|money }}</th></tr>
+</table>
+<p><strong>Ship to:</strong> {{ o.ship_name }}, {{ o.ship_street }}, {{ o.ship_city }}, {{ o.ship_state }} {{ o.ship_zip }}</p>
+{% if o.tracking %}<p><strong>UPS tracking:</strong> {{ o.tracking }}</p>{% endif %}
+{% if o.return_reason %}<p><strong>Return reason:</strong> <span class="pre">{{ o.return_reason }}</span></p>{% endif %}
+
+{% if allowed %}
+<form method="post" action="{{ url_for('shop.order_status', order_id=o.id) }}" class="card">
+  <h2>{{ 'Admin override' if role == 'admin' else 'Update order' }}</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Action <select name="status">
+    {% for s in allowed %}<option value="{{ s }}">{{ {'cancelled': 'Cancel order', 'return_requested': 'Request a return', 'shipped': 'Mark shipped', 'delivered': 'Mark delivered' if o.status != 'return_requested' else 'Deny return', 'returned': 'Approve return'}.get(s, s) }}</option>{% endfor %}
+  </select></label>
+  {% if 'shipped' in allowed %}<label>UPS tracking number <input name="tracking" maxlength="40" pattern="[A-Za-z0-9]+"></label>{% endif %}
+  {% if 'return_requested' in allowed %}<label>Return reason <textarea name="return_reason" maxlength="1000"></textarea></label>{% endif %}
+  <button>Submit</button>
+</form>
+{% endif %}
+{% if role == 'customer' %}
+  <p><a class="button secondary" href="{{ url_for('shop.thread', user_id=o.store.owner_id, order=o.id) }}">Message seller about this order</a></p>
+{% elif role == 'seller' %}
+  <p><a class="button secondary" href="{{ url_for('shop.thread', user_id=o.customer_id, order=o.id) }}">Message customer</a></p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "shop/base.html" %}
+{% block content %}
+{% if store %}<h1>{{ store.name }}</h1><p>{{ store.description|linebreaksbr }}</p>
+{% elif q %}<h1>Results for "{{ q }}"</h1>{% else %}<h1>Products</h1>{% endif %}
+<ul class="grid">
+{% for p in page %}
+  <li><a href="{% url 'product_detail' p.pk %}">
+    {% with img=p.images.all.0 %}{% if img %}<img src="{{ img.image.url }}" alt="" loading="lazy">{% endif %}{% endwith %}
+    <strong>{{ p.name }}</strong></a>
+    <span>${{ p.price }}</span> <small>{{ p.store.name }}</small></li>
+{% empty %}<li>No products found.</li>
+{% endfor %}
+</ul>
+{% include "shop/pager.html" %}
+{% endblock %}

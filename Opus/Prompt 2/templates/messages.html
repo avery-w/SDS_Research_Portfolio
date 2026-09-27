@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block body %}
+<h1>Messages</h1>
+{% if g.user.role == 'customer' %}<p class="muted">Questions about a product or order? Start a conversation from any product or order page.</p>{% endif %}
+{% for c in convs %}{% set last = c.messages[-1] if c.messages else none %}
+<a class="card row between" style="margin-bottom:10px;color:inherit;text-decoration:none" href="{{ url_for('shop.conversation', cid=c.id) }}">
+  <div><strong>{{ c.subject }}</strong><br>
+    <span class="small muted">{% if g.user.role == 'customer' %}{{ c.store.name }}{% elif g.user.role == 'seller' %}{{ c.customer.name }}{% else %}{{ c.customer.name }} ↔ {{ c.store.name }}{% endif %}
+    {% if last %} · {{ last.sender.name }}: {{ last.body|truncate(70) }}{% endif %}</span></div>
+  <div class="row">{% if last and last.sender_id != g.user.id and g.user.role != 'admin' %}<span class="badge warn">Awaiting your reply</span>{% endif %}
+    <span class="small muted">{{ c.updated_at.strftime('%b %d') }}</span></div>
+</a>
+{% else %}<div class="empty card"><div class="icon">💬</div><p>No conversations yet.</p></div>{% endfor %}
+{% endblock %}

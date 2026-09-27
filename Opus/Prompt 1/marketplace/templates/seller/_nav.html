@@ -1,0 +1,1 @@
+<nav class="subnav"><a href="{{ url_for('seller.dashboard') }}">Dashboard</a><a href="{{ url_for('seller.products') }}">Products</a><a href="{{ url_for('seller.orders') }}">Orders</a>{% if store %}<a href="{{ url_for('shop.store', store_id=store.id) }}">View storefront</a>{% endif %}</nav>

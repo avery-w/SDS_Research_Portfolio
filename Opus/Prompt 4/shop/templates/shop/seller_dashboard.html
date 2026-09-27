@@ -1,0 +1,22 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>{% if store %}{{ store.name }}{% else %}Create your store{% endif %}</h1>
+{% if store and not store.is_active %}<p class="flash error">Your store has been deactivated by an administrator. Products are hidden.</p>{% endif %}
+<details {% if not store %}open{% endif %}><summary>Store details</summary>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button>Save store</button></form></details>
+{% if store %}
+<p>Sales: {{ sales.n }} orders · ${{ sales.total|default:"0.00" }} in merchandise</p>
+<h2>Products <a class="button" href="{% url 'product_new' %}">Add product</a></h2>
+<table>
+<tr><th>Name</th><th>Price</th><th>Stock</th><th>Listed</th></tr>
+{% for p in products %}<tr><td><a href="{% url 'product_edit' p.pk %}">{{ p.name }}</a></td><td>${{ p.price }}</td><td>{{ p.stock }}</td><td>{{ p.is_active|yesno }}</td></tr>
+{% empty %}<tr><td colspan="4">No products yet.</td></tr>{% endfor %}
+</table>
+<h2>Recent orders</h2>
+<table>
+<tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th>Subtotal</th></tr>
+{% for o in orders %}<tr><td><a href="{% url 'seller_order' o.pk %}">#{{ o.pk }}</a></td><td>{{ o.customer.username }}</td><td>{{ o.created|date }}</td><td>{{ o.get_status_display }}</td><td>${{ o.subtotal }}</td></tr>
+{% empty %}<tr><td colspan="5">No orders yet.</td></tr>{% endfor %}
+</table>
+{% endif %}
+{% endblock %}

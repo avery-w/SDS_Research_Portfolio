@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>{{ 'Store profile' if s else 'Open your store' }}</h1>
+{% if s %}{% include "seller/_nav.html" %}{% else %}<p class="muted">Name your shop to start listing products. All orders ship via UPS from our Austin fulfilment center.</p>{% endif %}
+<form method="post" class="card" style="max-width:640px">{{ m.csrf() }}
+  {{ m.field('name', 'Store name', s.name if s else '', attrs='maxlength="80"') }}
+  {{ m.field('tagline', 'Tagline', s.tagline if s else '', required=false, attrs='maxlength="140"') }}
+  <div class="field"><label for="d">About your store</label><textarea id="d" name="description" maxlength="4000">{{ old('description', s.description if s else '') }}</textarea></div>
+  <button>{{ 'Save changes' if s else 'Create store' }}</button>
+</form>
+{% endblock %}

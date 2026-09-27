@@ -1,0 +1,14 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>{% if product.pk %}Edit {{ product.name }}{% else %}New product{% endif %}</h1>
+<form method="post">{% csrf_token %}{{ form.as_p }}<button>Save</button></form>
+{% if image_form %}
+<h2>Images</h2>
+<div class="gallery">{% for i in product.images.all %}
+  <figure><img src="{{ i.image.url }}" alt=""><form method="post" action="{% url 'image_delete' i.pk %}">{% csrf_token %}<button class="link">Delete</button></form></figure>
+{% endfor %}</div>
+<form method="post" enctype="multipart/form-data">{% csrf_token %}<input type="hidden" name="form" value="image">{{ image_form.as_p }}<button>Upload</button></form>
+<small>JPEG, PNG or WebP, up to 5 MB, 10 images max.</small>
+{% endif %}
+<p><a href="{% url 'seller_dashboard' %}">Back to store</a></p>
+{% endblock %}

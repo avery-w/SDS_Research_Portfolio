@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Users · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "admin/_nav.html" %}
+<form class="filters"><input name="q" value="{{ q }}" placeholder="Search name or email" aria-label="Search users"><button class="btn secondary">Search</button></form>
+<table class="card">
+  <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Role and status</th></tr></thead>
+  <tbody>
+  {% for u in page.items %}
+    <tr><td>{{ u.name }}{% if u.store %} <span class="muted">({{ u.store.name }})</span>{% endif %}</td><td>{{ u.email }}</td><td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+      <td>{% if u.id == current_user.id %}<span class="muted">you</span>{% else %}
+        <form method="post" action="{{ url_for('admin.user_update', user_id=u.id) }}" class="row">{{ csrf() }}
+          <select name="role" aria-label="Role">{% for r in roles %}<option {% if r == u.role %}selected{% endif %}>{{ r }}</option>{% endfor %}</select>
+          <select name="active" aria-label="Status"><option value="1" {% if u.active %}selected{% endif %}>Active</option><option value="0" {% if not u.active %}selected{% endif %}>Deactivated</option></select>
+          <button class="btn secondary small">Save</button>
+        </form>{% endif %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

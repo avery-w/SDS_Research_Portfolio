@@ -1,0 +1,9 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>Messages</h1>
+<ul class="threads">
+{% for t in threads %}<li><a href="{% url 'thread' t.other.pk %}"><strong>{{ t.other.store.name|default:t.other.username }}</strong></a>{% if t.unread %} ({{ t.unread }} new){% endif %}
+  <small>{{ t.last.created|timesince }} ago: {{ t.last.body|truncatechars:80 }}</small></li>
+{% empty %}<li>No messages yet. Use "Message seller" on a product or order page to ask a question.</li>{% endfor %}
+</ul>
+{% endblock %}

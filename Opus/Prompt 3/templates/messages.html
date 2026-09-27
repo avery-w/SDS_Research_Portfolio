@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Messages</h1>
+<table>
+  {% for user, last, unread in threads %}
+  <tr><td><a href="{{ url_for('shop.thread', user_id=user.id) }}">{{ user.store.name if user.store else user.name }}</a>{% if unread %} <strong>({{ unread }} new)</strong>{% endif %}</td>
+      <td class="muted">{{ last.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+  {% else %}<tr><td>No conversations yet. Use <strong>Message seller</strong> on any product or order.</td></tr>{% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Account · {{ site_name }}{% endblock %}
+{% block content %}
+<form method="post" class="card narrow form">
+  <h1>Your account</h1>{{ csrf() }}
+  <p class="muted">{{ current_user.email }} · {{ current_user.role }}</p>
+  <label>Name <input name="name" value="{{ current_user.name }}" required></label>
+  <h2>Default shipping address</h2>
+  <label>Street <input name="street" value="{{ current_user.street }}" autocomplete="street-address"></label>
+  <div class="row">
+    <label>City <input name="city" value="{{ current_user.city }}"></label>
+    <label>State <input name="state" value="{{ current_user.state }}" maxlength="2" size="3"></label>
+    <label>ZIP <input name="zip" value="{{ current_user.zip }}" size="10"></label>
+  </div>
+  <h2>Change password</h2>
+  <label>Current password <input type="password" name="current_password" autocomplete="current-password"></label>
+  <label>New password <input type="password" name="new_password" minlength="8" autocomplete="new-password"></label>
+  <button class="btn">Save</button>
+</form>
+{% endblock %}

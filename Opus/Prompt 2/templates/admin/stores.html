@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Stores</h1>
+{% include "admin/_nav.html" %}
+<div class="card table-wrap"><table>
+  <tr><th>Store</th><th>Owner</th><th class="num">Products</th><th>Status</th><th></th></tr>
+  {% for s, n in rows %}
+  <tr><td><a href="{{ url_for('shop.store', slug=s.slug) }}"><strong>{{ s.name }}</strong></a><br><span class="small muted">{{ s.tagline }}</span></td>
+    <td class="small">{{ s.owner.name }}<br>{{ s.owner.email }}{% if not s.owner.is_active %} <span class="badge bad">owner deactivated</span>{% endif %}</td>
+    <td class="num">{{ n }}</td>
+    <td>{% if s.is_active %}<span class="badge ok">Open</span>{% else %}<span class="badge bad">Suspended</span>{% endif %}</td>
+    <td class="right"><form method="post" action="{{ url_for('admin.toggle_store', sid=s.id) }}" data-confirm="{{ 'Suspend' if s.is_active else 'Reinstate' }} {{ s.name }}?">{{ m.csrf() }}<button class="sm {{ 'danger' if s.is_active else 'ghost' }}">{{ 'Suspend' if s.is_active else 'Reinstate' }}</button></form></td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No stores yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

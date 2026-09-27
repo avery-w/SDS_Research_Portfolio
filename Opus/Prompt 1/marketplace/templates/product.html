@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}{{ p.name }} · {{ site_name }}{% endblock %}
+{% block content %}
+<article class="product-detail">
+  {% if p.image %}<img src="{{ url_for('static', filename='uploads/' ~ p.image) }}" alt="{{ p.name }}">
+  {% else %}<div class="img-placeholder big" aria-hidden="true">{{ p.name[:1] }}</div>{% endif %}
+  <div>
+    <p class="muted">{{ p.category }} · sold by <a href="{{ url_for('shop.store', store_id=p.store.id) }}">{{ p.store.name }}</a></p>
+    <h1>{{ p.name }}</h1>
+    <p class="price big">{{ p.price_cents | money }}</p>
+    <p class="pre">{{ p.description }}</p>
+    <p class="muted">{{ p.weight_lb }} lb · {{ p.length_in }} × {{ p.width_in }} × {{ p.height_in }} in · ships via UPS from Austin, TX</p>
+    {% if p.stock > 0 %}
+      <form method="post" action="{{ url_for('shop.cart_set', product_id=p.id) }}" class="row">
+        {{ csrf() }}<input type="hidden" name="mode" value="add"><input type="hidden" name="back" value="product">
+        <input type="number" name="quantity" value="1" min="1" max="{{ p.stock }}" aria-label="Quantity" class="qty">
+        <button class="btn">Add to cart</button>
+      </form>
+      <p class="muted">{{ p.stock }} in stock</p>
+    {% else %}<p class="status status-cancelled">Out of stock</p>{% endif %}
+    {% if current_user.is_authenticated and current_user.id != p.store.owner_id %}
+      <a class="btn secondary" href="{{ url_for('shop.thread', user_id=p.store.owner_id, product=p.id) }}">Message the seller</a>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

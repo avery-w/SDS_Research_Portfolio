@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% from "_macros.html" import status as status_badge %}
+{% block title %}{{ title }} · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>{{ title }}</h1>
+{% if statuses %}
+<form class="filters"><select name="status" aria-label="Filter by status" onchange="this.form.submit()">
+  <option value="">All statuses</option>
+  {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s.replace('_', ' ') }}</option>{% endfor %}
+</select></form>
+{% endif %}
+<table class="card">
+  <thead><tr><th>Order</th><th>Date</th><th>Store</th><th>Customer</th><th>Status</th><th class="num">Total</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+    <tr>
+      <td><a href="{{ url_for('shop.order', order_id=o.id) }}">#{{ o.id }}</a></td>
+      <td>{{ o.created_at.strftime('%b %d, %Y') }}</td>
+      <td>{{ o.store.name }}</td>
+      <td>{{ o.ship_name }}</td>
+      <td>{{ status_badge(o.status) }}</td>
+      <td class="num">{{ o.total_cents | money }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="6" class="empty">No orders yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

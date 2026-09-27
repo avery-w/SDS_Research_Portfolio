@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<p class="small"><a href="{{ url_for('shop.inbox') }}">← All messages</a></p>
+{% if c %}
+  <h1>{{ c.subject }}</h1>
+  <p class="muted">{{ c.customer.name }} ↔ <a href="{{ url_for('shop.store', slug=s.slug) }}">{{ s.name }}</a>
+    {% if p %} · about <a href="{{ url_for('shop.product', pid=p.id) }}">{{ p.name }}</a>{% endif %}
+    {% if c.order_id %} · <a href="{{ url_for('shop.order', oid=c.order_id) }}">Order #{{ c.order_id }}</a>{% endif %}</p>
+  <div class="card thread">
+    {% for msg in c.messages %}
+      <div class="bubble {{ 'me' if msg.sender_id == g.user.id else 'them' }}" {% if loop.last %}id="latest"{% endif %}>
+        <div class="who">{{ msg.sender.name }}{% if msg.sender.role == 'admin' %} (Platform support){% elif msg.sender.role == 'seller' %} ({{ s.name }}){% endif %} · {{ msg.created_at.strftime('%b %d, %I:%M %p') }}</div>{{ msg.body }}</div>
+    {% endfor %}
+  </div>
+  <form method="post" class="card" style="margin-top:16px">{{ m.csrf() }}
+    <label for="body">Reply{% if g.user.role == 'admin' %} as platform support{% endif %}</label>
+    <textarea id="body" name="body" maxlength="4000" required></textarea>
+    <button style="margin-top:8px">Send</button>
+  </form>
+{% else %}
+  <h1>Message {{ s.name }}</h1>
+  <p class="muted">Sellers usually reply within a day. You'll find the conversation under Messages.</p>
+  <form method="post" class="card">{{ m.csrf() }}
+    <input type="hidden" name="store_id" value="{{ s.id }}">
+    {% if p %}<input type="hidden" name="product_id" value="{{ p.id }}"><p class="small">About: <strong>{{ p.name }}</strong></p>{% endif %}
+    {% if o %}<input type="hidden" name="order_id" value="{{ o.id }}"><p class="small">Order: <strong>#{{ o.id }}</strong></p>{% endif %}
+    {{ m.field('subject', 'Subject', default_subject, attrs='maxlength="140"') }}
+    <div class="field"><label for="body">Message</label><textarea id="body" name="body" maxlength="4000" required>{{ old('body') }}</textarea></div>
+    <button>Send message</button>
+  </form>
+{% endif %}
+{% endblock %}

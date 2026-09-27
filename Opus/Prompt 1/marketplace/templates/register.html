@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Sign up · {{ site_name }}{% endblock %}
+{% block content %}
+<form method="post" class="card narrow form">
+  <h1>Create an account</h1>{{ csrf() }}
+  <label>Name <input name="name" required autocomplete="name" value="{{ request.form.name }}"></label>
+  <label>Email <input type="email" name="email" required autocomplete="email" value="{{ request.form.email }}"></label>
+  <label>Password <input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+  <fieldset><legend>I want to</legend>
+    <label class="check"><input type="radio" name="role" value="customer" checked> Shop</label>
+    <label class="check"><input type="radio" name="role" value="seller" {% if request.form.role == 'seller' %}checked{% endif %}> Sell</label>
+  </fieldset>
+  <button class="btn">Sign up</button>
+</form>
+{% endblock %}

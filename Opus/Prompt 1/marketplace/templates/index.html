@@ -1,0 +1,29 @@
+{% extends "base.html" %}{% from "_macros.html" import product_card %}
+{% block content %}
+<form class="filters">
+  <input type="hidden" name="q" value="{{ q }}">
+  <select name="category" aria-label="Category"><option value="">All categories</option>
+    {% for c in categories %}<option {% if c == category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+  </select>
+  <input name="min" type="number" min="0" step="0.01" placeholder="Min $" value="{{ request.args.min }}" aria-label="Minimum price">
+  <input name="max" type="number" min="0" step="0.01" placeholder="Max $" value="{{ request.args.max }}" aria-label="Maximum price">
+  <select name="sort" aria-label="Sort">
+    {% for key, label in [('new','Newest'),('price_asc','Price: low to high'),('price_desc','Price: high to low'),('name','Name')] %}
+      <option value="{{ key }}" {% if key == sort %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn secondary">Apply</button>
+</form>
+{% if q %}<h1>Results for “{{ q }}”</h1>{% endif %}
+<div class="grid">
+  {% for p in page.items %}{{ product_card(p) }}{% else %}<p class="empty">No products found.</p>{% endfor %}
+</div>
+{% if page.pages > 1 %}
+<nav class="pager">
+  {% set args = request.args.to_dict() %}
+  {% if page.has_prev %}<a href="{{ url_for('shop.index', **dict(args, page=page.prev_num)) }}">← Prev</a>{% endif %}
+  <span>Page {{ page.page }} of {{ page.pages }}</span>
+  {% if page.has_next %}<a href="{{ url_for('shop.index', **dict(args, page=page.next_num)) }}">Next →</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

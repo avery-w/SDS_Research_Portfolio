@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Products · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "admin/_nav.html" %}
+<form class="filters"><input name="q" value="{{ q }}" placeholder="Search products" aria-label="Search products"><button class="btn secondary">Search</button></form>
+<table class="card">
+  <thead><tr><th>Product</th><th>Store</th><th class="num">Price</th><th class="num">Stock</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for p in page.items %}
+    <tr><td>{{ p.name }}</td><td>{{ p.store.name }}</td><td class="num">{{ p.price_cents | money }}</td><td class="num">{{ p.stock }}</td><td>{{ 'Active' if p.active else 'Hidden' }}</td>
+      <td class="row"><a href="{{ url_for('seller.product_form', product_id=p.id) }}">Edit</a>
+        <form method="post" action="{{ url_for('admin.product_toggle', product_id=p.id) }}">{{ csrf() }}<button class="btn secondary small">{{ 'Hide' if p.active else 'Activate' }}</button></form></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

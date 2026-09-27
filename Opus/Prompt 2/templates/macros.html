@@ -1,0 +1,70 @@
+{% set EMOJI = {'Electronics': '🎧', 'Home': '🪴', 'Apparel': '👕', 'Books': '📚', 'Outdoors': '🏕️', 'Beauty': '🧴', 'Toys': '🧸', 'Grocery': '☕'} %}
+
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+
+{% macro thumb(p, cls='') %}
+<div class="thumb {{ cls }}">{% if p.image %}<img src="{{ url_for('upload', name=p.image) }}" alt="{{ p.name }}" loading="lazy">{% else %}<span aria-hidden="true">{{ EMOJI.get(p.category, '🛍️') }}</span>{% endif %}</div>
+{% endmacro %}
+
+{% macro product_card(p) %}
+<a class="pcard" href="{{ url_for('shop.product', pid=p.id) }}">
+  {{ thumb(p) }}
+  <div class="body">
+    <span class="muted small">{{ p.store.name }}</span>
+    <span class="name">{{ p.name }}</span>
+    <div class="row between"><span class="price">{{ money(p.price_cents) }}</span>
+      {% if p.stock == 0 %}<span class="badge bad">Sold out</span>{% elif p.stock <= 5 %}<span class="badge warn">{{ p.stock }} left</span>{% endif %}</div>
+  </div>
+</a>
+{% endmacro %}
+
+{% macro status(s) %}
+{% set cls = {'pending': 'warn', 'shipped': 'info', 'partially shipped': 'info', 'delivered': 'ok', 'cancelled': 'bad', 'return_requested': 'warn', 'returned': '', 'return_rejected': 'bad'} %}
+<span class="badge {{ cls.get(s, '') }}">{{ s.replace('_', ' ') }}</span>
+{% endmacro %}
+
+{% macro field(name, label, value='', type='text', hint='', required=true, attrs='') %}
+<div class="field"><label for="f-{{ name }}">{{ label }}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ old(name, value if value is not none else '') }}" {{ 'required' if required }} {{ attrs|safe }}>
+  {% if hint %}<div class="hint">{{ hint }}</div>{% endif %}</div>
+{% endmacro %}
+
+{% macro pager(page, endpoint) %}
+{% if page.pages > 1 %}
+<nav class="pager" aria-label="Pages">
+  {% set args = request.args.to_dict() %}
+  {% if page.has_prev %}{% set _ = args.update(page=page.prev_num) %}<a class="btn sm ghost" href="{{ url_for(endpoint, **dict(request.view_args, **args)) }}">← Prev</a>{% endif %}
+  <span class="btn sm ghost" aria-current="page">Page {{ page.page }} of {{ page.pages }}</span>
+  {% if page.has_next %}{% set _ = args.update(page=page.next_num) %}<a class="btn sm ghost" href="{{ url_for(endpoint, **dict(request.view_args, **args)) }}">Next →</a>{% endif %}
+</nav>
+{% endif %}
+{% endmacro %}
+
+{# Single-series daily revenue bars (inline SVG). Native <title> gives each bar a hover tooltip. #}
+{% macro revenue_chart(series, label='Revenue') %}
+{% set peak = (series|map(attribute=1)|max) or 1 %}
+{% set n = series|length %}
+<figure class="chart" style="margin:0">
+  <svg viewBox="0 0 {{ n * 20 }} 200" preserveAspectRatio="none" role="img" aria-label="{{ label }} per day, last {{ n }} days">
+    {% for frac in [0.5, 1] %}<line class="grid-line" x1="0" x2="{{ n * 20 }}" y1="{{ 180 - 170 * frac }}" y2="{{ 180 - 170 * frac }}" vector-effect="non-scaling-stroke"/>{% endfor %}
+    <line class="grid-line" x1="0" x2="{{ n * 20 }}" y1="180" y2="180" vector-effect="non-scaling-stroke"/>
+    {% for d, cents in series %}
+      {% set h = [170 * cents / peak, 1 if cents else 0]|max %}
+      <rect class="bar" x="{{ loop.index0 * 20 + 3 }}" y="{{ 180 - h }}" width="14" height="{{ h }}" rx="3"><title>{{ d.strftime('%b %d') }}: {{ money(cents) }}</title></rect>
+    {% endfor %}
+  </svg>
+  <div class="row between small muted"><span>{{ series[0][0].strftime('%b %d') }}</span><span>Peak {{ money(peak) }}/day</span><span>{{ series[-1][0].strftime('%b %d') }}</span></div>
+  <details class="data"><summary>View as table</summary><div class="table-wrap"><table><tr><th>Day</th><th class="num">{{ label }}</th></tr>
+    {% for d, cents in series|reverse %}<tr><td>{{ d.strftime('%a %b %d') }}</td><td class="num">{{ money(cents) }}</td></tr>{% endfor %}</table></div></details>
+</figure>
+{% endmacro %}
+
+{% macro hbars(rows, fmt_money=true) %}
+{% set peak = (rows|map(attribute=1)|max) if rows else 1 %}
+<div class="hbars">
+{% for name, value in rows %}
+  <div class="hbar"><div class="meta"><span>{{ name }}</span><strong>{{ money(value) if fmt_money else value }}</strong></div>
+  <div class="track"><div class="fill" style="width: {{ (100 * value / (peak or 1))|round(1) }}%"></div></div></div>
+{% else %}<p class="muted small">No data yet.</p>{% endfor %}
+</div>
+{% endmacro %}

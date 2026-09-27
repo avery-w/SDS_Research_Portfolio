@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf, revenue_chart %}
+{% block title %}My store · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "seller/_nav.html" %}
+{% if store and not store.active %}<div class="flash error">This store was deactivated by an administrator. Contact support.</div>{% endif %}
+{% if stats %}
+<div class="tiles">
+  <div class="tile"><span class="muted">Revenue</span><strong>{{ stats.revenue_cents | money }}</strong></div>
+  <div class="tile"><span class="muted">Orders</span><strong>{{ stats.orders }}</strong></div>
+  <div class="tile"><span class="muted">Units sold</span><strong>{{ stats.units }}</strong></div>
+  <div class="tile"><span class="muted">Awaiting shipment</span><strong>{{ stats.by_status.get('placed', 0) }}</strong></div>
+</div>
+{{ revenue_chart(stats.daily, "Product sales, last 30 days") }}
+{% if low_stock %}<section class="card"><h2>Low stock</h2><ul class="plain">{% for p in low_stock %}<li><a href="{{ url_for('seller.product_form', product_id=p.id) }}">{{ p.name }}</a> <span class="muted">{{ p.stock }} left</span></li>{% endfor %}</ul></section>{% endif %}
+{% endif %}
+<form method="post" class="card form">
+  <h2>{{ 'Store details' if store else 'Create your store' }}</h2>{{ csrf() }}
+  <label>Store name <input name="name" required value="{{ store.name if store else '' }}"></label>
+  <label>Description <textarea name="description" rows="3">{{ store.description if store else '' }}</textarea></label>
+  <button class="btn">Save store</button>
+</form>
+{% endblock %}

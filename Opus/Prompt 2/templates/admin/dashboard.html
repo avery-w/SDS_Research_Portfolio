@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Platform analytics</h1>
+{% include "admin/_nav.html" %}
+<div class="stats">
+  <div class="stat"><div class="label">GMV, last 30 days</div><div class="value">{{ money(gross_30) }}</div></div>
+  <div class="stat"><div class="label">Commission earned (30d, {{ commission|round(1) }}%)</div><div class="value">{{ money(commission_30) }}</div></div>
+  <div class="stat"><div class="label">Orders (30d)</div><div class="value">{{ orders_30 }}</div></div>
+  <div class="stat"><div class="label">Avg. order value (30d)</div><div class="value">{{ money(aov) }}</div></div>
+  <div class="stat"><div class="label">GMV, all time</div><div class="value">{{ money(gross_all) }}</div></div>
+  <div class="stat"><div class="label">Users (new in 30d)</div><div class="value">{{ users.values()|sum }} <span class="small muted">(+{{ new_users }})</span></div>
+    <div class="small muted">{{ users.get('customer', 0) }} customers · {{ users.get('seller', 0) }} sellers · {{ users.get('admin', 0) }} admins</div></div>
+</div>
+<section class="card" style="margin-bottom:20px"><h2>Daily GMV, last 30 days</h2>{{ m.revenue_chart(series, 'GMV') }}</section>
+<div class="grid cols-2">
+  <section class="card"><h2>Top stores</h2>{{ m.hbars(top_stores) }}</section>
+  <section class="card"><h2>Revenue by category</h2>{{ m.hbars(by_category) }}</section>
+  <section class="card"><h2>Top products</h2>
+    <div class="hbars">{% set peak = (top|map(attribute=2)|max) if top else 1 %}
+    {% for name, units, cents in top %}<div class="hbar"><div class="meta"><span>{{ name }} <span class="muted small">· {{ units }} sold</span></span><strong>{{ money(cents) }}</strong></div>
+      <div class="track"><div class="fill" style="width:{{ (100 * cents / peak)|round(1) }}%"></div></div></div>{% else %}<p class="muted small">No sales yet.</p>{% endfor %}</div></section>
+  <section class="card"><h2>Order items by status</h2>
+    <div class="table-wrap"><table>{% for s, n in by_status %}<tr><td>{{ m.status(s) }}</td><td class="num">{{ n }}</td>
+      <td style="width:50%"><div class="track" style="height:8px;border-radius:4px;background:var(--surface-2)"><div class="fill" style="height:100%;border-radius:4px;background:var(--series-1);width:{{ (100 * n / ((by_status|map(attribute=1)|max) or 1))|round(1) }}%"></div></div></td></tr>{% endfor %}</table></div>
+    <p class="small"><a href="{{ url_for('admin.orders', status='return_requested') }}">Review open return requests →</a></p></section>
+</div>
+<section class="card" style="margin-top:20px"><div class="row between"><h2>Recent admin activity</h2><a href="{{ url_for('admin.audit_log') }}">Full audit log →</a></div>
+  {% for a in recent %}<div class="small" style="padding:4px 0"><span class="muted">{{ a.created_at.strftime('%b %d %H:%M') }}</span> · <strong>{{ a.actor.name if a.actor else 'system' }}</strong> · {{ a.action }} · {{ a.detail }}</div>
+  {% else %}<p class="muted small">No admin actions yet.</p>{% endfor %}
+</section>
+{% endblock %}

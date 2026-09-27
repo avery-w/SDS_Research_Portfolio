@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf %}
+{% block title %}{{ 'Create account' if mode == 'register' else 'Sign in' }} · Forty Acres Market{% endblock %}
+{% block content %}
+<section class="auth card">
+  {% if mode == 'login' %}
+    <h1>Welcome back</h1>
+    <form method="post" action="{{ url_for('login', next=request.args.get('next')) }}" class="stack">
+      {{ csrf() }}
+      <label>Email <input type="email" name="email" required maxlength="254" autocomplete="email" autofocus></label>
+      <label>Password <input type="password" name="password" required maxlength="128" autocomplete="current-password"></label>
+      <button class="btn btn-block">Sign in</button>
+    </form>
+    <p class="muted center">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+  {% else %}
+    <h1>Join Forty Acres Market</h1>
+    <form method="post" class="stack" id="register-form">
+      {{ csrf() }}
+      <fieldset class="segmented">
+        <legend class="sr-only">Account type</legend>
+        <label><input type="radio" name="role" value="customer" checked> I want to shop</label>
+        <label><input type="radio" name="role" value="seller"> I want to sell</label>
+      </fieldset>
+      <label>Full name <input name="name" required maxlength="100" autocomplete="name"></label>
+      <label>Email <input type="email" name="email" required maxlength="254" autocomplete="email"></label>
+      <label>Password <input type="password" name="password" required minlength="8" maxlength="128" autocomplete="new-password"></label>
+      <label class="seller-only">Store name <input name="store_name" maxlength="80"></label>
+      <button class="btn btn-block">Create account</button>
+    </form>
+    <p class="muted center">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+  {% endif %}
+</section>
+{% endblock %}

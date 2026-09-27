@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Your orders</h1>
+{% for o in orders %}
+<a class="card row between" style="margin-bottom:12px;color:inherit;text-decoration:none" href="{{ url_for('shop.order', oid=o.id) }}">
+  <div><strong>Order #{{ o.id }}</strong> <span class="muted small">· {{ o.created_at.strftime('%b %d, %Y') }}</span><br>
+    <span class="small muted">{{ o.items|map(attribute='name')|join(', ')|truncate(90) }}</span></div>
+  <div class="row">{{ m.status(o.status) }}<strong>{{ money(o.total_cents) }}</strong></div>
+</a>
+{% else %}
+<div class="empty card"><div class="icon">📦</div><p>No orders yet.</p><a class="btn" href="{{ url_for('shop.products') }}">Start shopping</a></div>
+{% endfor %}
+{% endblock %}

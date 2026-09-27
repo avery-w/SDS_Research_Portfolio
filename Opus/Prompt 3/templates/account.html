@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" class="card narrow">
+  <h1>Your account</h1>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <p class="muted">{{ current_user.email }} · {{ current_user.role }}</p>
+  <label>Name <input name="name" maxlength="100" required value="{{ current_user.name }}"></label>
+  <h2>Default shipping address</h2>
+  {% set a = current_user %}{% include "_address.html" %}
+  <h2>Change password</h2>
+  <label>Current password <input type="password" name="current_password" autocomplete="current-password"></label>
+  <label>New password <input type="password" name="new_password" minlength="10" maxlength="128" autocomplete="new-password"></label>
+  <button>Save</button>
+</form>
+{% endblock %}

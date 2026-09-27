@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Orders</h1>
+{% include "seller/_nav.html" %}
+<div class="chips" style="margin-bottom:16px"><a class="chip {{ 'active' if not status }}" href="{{ url_for('seller.orders') }}">All</a>
+  {% for s in statuses %}<a class="chip {{ 'active' if status == s }}" href="{{ url_for('seller.orders', status=s) }}">{{ s.replace('_', ' ')|capitalize }}</a>{% endfor %}</div>
+<div class="card table-wrap"><table>
+  <tr><th>Order</th><th>Item</th><th>Ship to</th><th>Status</th><th class="num">Amount</th></tr>
+  {% for i in items %}
+  <tr><td><a href="{{ url_for('shop.order', oid=i.order_id) }}">#{{ i.order_id }}</a><br><span class="small muted">{{ i.order.created_at.strftime('%b %d') }}</span></td>
+    <td>{{ i.qty }} × {{ i.name }}</td>
+    <td class="small">{{ i.order.ship_name }}<br>{{ i.order.ship_city }}, {{ i.order.ship_state }}</td>
+    <td>{{ m.status(i.status) }}</td><td class="num">{{ money(i.line_cents) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No orders here yet.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

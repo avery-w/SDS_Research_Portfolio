@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Checkout</h1>
+{% set u = g.user %}
+<form method="post" id="checkout-form" data-subtotal="{{ subtotal }}" data-tax="{{ setting('tax_rate_pct') }}" class="grid split" style="align-items:start">{{ m.csrf() }}
+  <div class="stack">
+    <section class="card"><h2>Ship to</h2>
+      {{ m.field('name', 'Recipient name', u.name, attrs='autocomplete="name"') }}
+      {{ m.field('street', 'Street address', u.street, attrs='autocomplete="street-address"') }}
+      <div class="fields-3">
+        {{ m.field('city', 'City', u.city, attrs='autocomplete="address-level2"') }}
+        {{ m.field('state', 'State', u.state, attrs='maxlength="2" autocomplete="address-level1" style="text-transform:uppercase"') }}
+        {{ m.field('zip', 'ZIP', u.zip, attrs='inputmode="numeric" autocomplete="postal-code"') }}
+      </div>
+      <label class="small" style="font-weight:400"><input type="checkbox" name="save_address" checked> Save as my default address</label>
+    </section>
+    <section class="card"><h2>UPS shipping</h2>
+      <p class="small muted">Rated live from {{ origin.street }}, {{ origin.city }}, {{ origin.state }} {{ origin.zip }} using UPS zones, dimensional weight (÷139), package surcharges and the current fuel surcharge.</p>
+      <div id="ship-options"></div>
+    </section>
+    <section class="card"><h2>Payment</h2>
+      <p class="small muted">🔒 Demo mode: payment is simulated and no card is charged.</p>
+    </section>
+  </div>
+  <aside class="card"><h2>Order summary</h2>
+    {% for c in lines %}<div class="row between small"><span>{{ c.qty }} × {{ c.product.name }}</span><span>{{ money(c.product.price_cents * c.qty) }}</span></div>{% endfor %}
+    <table class="totals" style="margin-top:12px">
+      <tr><td>Subtotal</td><td class="num">{{ money(subtotal) }}</td></tr>
+      <tr><td>Shipping</td><td class="num" id="t-ship">…</td></tr>
+      <tr><td>Tax ({{ setting('tax_rate_pct') }}%)</td><td class="num" id="t-tax">…</td></tr>
+      <tr class="grand"><td>Total</td><td class="num" id="t-total">…</td></tr>
+    </table>
+    <button type="submit" class="block" style="margin-top:16px" disabled>Place order</button>
+  </aside>
+</form>
+{% endblock %}

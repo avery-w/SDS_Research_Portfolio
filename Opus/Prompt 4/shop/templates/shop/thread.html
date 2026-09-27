@@ -1,0 +1,13 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>Conversation with {{ other.store.name|default:other.username }}</h1>
+<ol class="convo">
+{% for m in convo %}<li class="{% if m.sender_id == user.pk %}mine{% endif %}">
+  <small>{{ m.sender.username }} · {{ m.created }}{% if m.product %} · re: <a href="{% url 'product_detail' m.product_id %}">{{ m.product.name }}</a>{% endif %}{% if m.order %} · re: order #{{ m.order_id }}{% endif %}</small>
+  <p>{{ m.body|linebreaksbr }}</p></li>
+{% empty %}<li>Start the conversation below.</li>{% endfor %}
+</ol>
+<form method="post">{% csrf_token %}{{ form.as_p }}
+  <input type="hidden" name="product" value="{{ about.product }}"><input type="hidden" name="order" value="{{ about.order }}">
+  <button>Send</button></form>
+{% endblock %}

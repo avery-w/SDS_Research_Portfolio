@@ -1,0 +1,44 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site.site_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'shop/style.css' %}">
+  <script src="{% static 'shop/app.js' %}" defer></script>
+</head>
+<body>
+<header>
+  <a class="brand" href="{% url 'home' %}">{{ site.site_name }}</a>
+  <form action="{% url 'home' %}" role="search"><input name="q" value="{{ q }}" placeholder="Search products" aria-label="Search products"></form>
+  <nav>
+    {% if user.is_authenticated %}
+      {% if user.role == "seller" %}<a href="{% url 'seller_dashboard' %}">My store</a>{% endif %}
+      {% if user.is_staff %}<a href="{% url 'analytics' %}">Analytics</a>{% endif %}
+      <a href="{% url 'inbox' %}">Messages{% if unread %} ({{ unread }}){% endif %}</a>
+      <a href="{% url 'orders' %}">Orders</a>
+      <a href="{% url 'cart' %}">Cart ({{ cart_count }})</a>
+      <a href="{% url 'account' %}">Account</a>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="link">Log out</button></form>
+    {% else %}
+      <a href="{% url 'login' %}">Log in</a> <a href="{% url 'signup' %}">Sign up</a>
+    {% endif %}
+  </nav>
+</header>
+<main>
+  {% for m in messages %}<p class="flash {{ m.tags }}" role="status">{{ m }}</p>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+{% if user.is_authenticated and site.chatbot_enabled %}
+<details id="chat">
+  <summary>Need help? Chat with our assistant</summary>
+  <div id="chat-log" aria-live="polite"></div>
+  <form id="chat-form" data-url="{% url 'api_chat' %}">{% csrf_token %}
+    <input name="message" maxlength="1000" autocomplete="off" required aria-label="Message the assistant">
+    <button>Send</button>
+  </form>
+  <small>For product or order questions, the seller can answer best: use "Message seller".</small>
+</details>
+{% endif %}
+</body>
+</html>

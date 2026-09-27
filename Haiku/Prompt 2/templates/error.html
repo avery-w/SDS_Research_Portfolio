@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · Forty Acres Market{% endblock %}
+{% block content %}
+<section class="empty">
+  <div class="empty-code">{{ code }}</div>
+  <h1>{{ {400: "That request didn't look right", 403: "You don't have access", 404: "Not found", 405: "Not allowed",
+          409: "Something changed", 413: "File too large", 415: "Unsupported format", 429: "Slow down a little"}.get(code, "Something went wrong") }}</h1>
+  <p class="muted">{{ message }}</p>
+  <p><a class="btn" href="{{ url_for('index') }}">Back to the market</a></p>
+</section>
+{% endblock %}

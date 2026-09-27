@@ -1,0 +1,12 @@
+{% extends "shop/base.html" %}
+{% block content %}
+<h1>Checkout</h1>
+<ul>{% for l in lines %}<li>{{ l.quantity }} × {{ l.product.name }} ({{ l.product.store.name }}) · ${{ l.product.price }}</li>{% endfor %}</ul>
+<p>Subtotal: ${{ subtotal }}. Items from each seller ship separately via UPS from 110 Inner Campus Drive, Austin, TX 78705.</p>
+<form method="post" id="checkout" data-rates-url="{% url 'api_shipping_rates' %}">{% csrf_token %}
+  {{ form.as_p }}
+  <button type="button" id="get-rates">Get shipping rates</button>
+  <div id="rates" aria-live="polite"></div>
+  <button>Place order</button>
+</form>
+{% endblock %}

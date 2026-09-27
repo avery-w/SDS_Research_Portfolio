@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block title %}{{ p.name }} · {{ setting('platform_name') }}{% endblock %}
+{% block body %}
+<p class="small"><a href="{{ url_for('shop.products', category=p.category) }}">{{ p.category }}</a> / {{ p.name }}</p>
+<div class="grid cols-2" style="align-items:start">
+  {{ m.thumb(p, 'lg') }}
+  <div class="stack">
+    <div><a class="muted" href="{{ url_for('shop.store', slug=p.store.slug) }}">{{ p.store.name }}</a><h1>{{ p.name }}</h1>
+      <div class="price xl">{{ money(p.price_cents) }}</div></div>
+    <p style="white-space:pre-line">{{ p.description }}</p>
+    <div class="row small muted"><span>📦 {{ p.weight_lb }} lb · {{ p.length_in|round(1) }}×{{ p.width_in|round(1) }}×{{ p.height_in|round(1) }} in</span>
+      <span>{% if p.stock == 0 %}<span class="badge bad">Sold out</span>{% elif p.stock <= 5 %}<span class="badge warn">Only {{ p.stock }} left</span>{% else %}<span class="badge ok">In stock</span>{% endif %}</span></div>
+    {% if not g.user or g.user.role == 'customer' %}
+      {% if p.stock > 0 %}
+      <form method="post" action="{{ url_for('shop.cart_add') }}" class="row">{{ m.csrf() }}
+        <input type="hidden" name="product_id" value="{{ p.id }}">
+        <input name="qty" type="number" min="1" max="{{ [p.stock, 99]|min }}" value="1" style="width:90px" aria-label="Quantity">
+        <button>Add to cart</button>
+      </form>
+      {% endif %}
+      <div class="card flat" style="background:var(--surface-2)">
+        <strong>Have a question about this item?</strong>
+        <p class="small muted" style="margin:4px 0 10px">{{ p.store.name }} can answer sizing, materials, custom requests and more.</p>
+        <a class="btn ghost sm" href="{{ url_for('shop.new_message', store_id=p.store_id, product_id=p.id) }}">💬 Message the seller</a>
+      </div>
+      <div class="card flat" id="ship-estimate">
+        <strong>UPS shipping estimate</strong>
+        <form class="row" style="margin-top:8px" onsubmit="event.preventDefault(); estimate(this)">
+          <input name="zip" inputmode="numeric" pattern="\d{5}" placeholder="Your ZIP" value="{{ g.user.zip if g.user else '' }}" style="width:130px" required aria-label="ZIP code">
+          <button class="ghost sm">Get rates</button></form>
+        <div id="est-out" class="small" style="margin-top:8px"></div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% if related %}<h2 style="margin-top:40px">More in {{ p.category }}</h2>
+<div class="grid cols-4">{% for r in related %}{{ m.product_card(r) }}{% endfor %}</div>{% endif %}
+<script>
+async function estimate(form) {
+  const out = document.getElementById("est-out");
+  out.textContent = "Rating…";
+  try {
+    const q = await postJSON("/api/shipping/rates", { zip: form.zip.value, items: [{ product_id: {{ p.id }}, qty: 1 }] });
+    out.innerHTML = q.options.map(o => `<div class="row between"><span>${esc(o.name)} · ${o.transit_days}d</span><strong>${o.free ? "FREE" : usd(o.total)}</strong></div>`).join("")
+      + `<p class="muted">Zone ${q.zone} from Austin, TX 78705</p>`;
+  } catch (e) { out.innerHTML = `<span class="badge bad">${esc(e.message)}</span>`; }
+}
+</script>
+{% endblock %}

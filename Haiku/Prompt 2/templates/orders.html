@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status with context %}
+{% block title %}Orders · Forty Acres Market{% endblock %}
+{% block content %}
+<h1>Your orders</h1>
+{% if placed %}<div class="flash flash-success">Order {{ placed }} placed! Each store ships its part separately; you'll see tracking here.</div>{% endif %}
+{% for o in orders %}
+  <a class="card order-row {{ 'highlight' if o.checkout_ref == placed }}" href="{{ url_for('order_detail', oid=o.id) }}">
+    <div><b>Order #{{ o.id }}</b> <span class="muted small">{{ o.checkout_ref }} · {{ o.created_at|dt }}</span>
+      <div class="muted small">{{ o.store_name }} · {% for i in items.get(o.id, []) %}{{ i.qty }}× {{ i.name }}{{ ', ' if not loop.last }}{% endfor %}</div></div>
+    <div class="right">{{ status(o.status) }}<div><b>{{ o.total_cents|money }}</b></div></div>
+  </a>
+{% else %}
+  <section class="empty"><h2>No orders yet.</h2><p><a class="btn" href="{{ url_for('index') }}">Browse the market</a></p></section>
+{% endfor %}
+{% endblock %}

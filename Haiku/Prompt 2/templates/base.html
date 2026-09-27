@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}Forty Acres Market{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% if settings.banner %}<div class="banner">{{ settings.banner }}</div>{% endif %}
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="{{ url_for('index') }}"><span class="brand-mark">FA</span><span>Forty Acres <b>Market</b></span></a>
+    <form class="search" action="{{ url_for('index') }}" method="get" role="search">
+      <input type="search" name="q" value="{{ request.args.get('q', '') }}" placeholder="Search products, stores, categories" aria-label="Search" maxlength="100">
+    </form>
+    <nav class="nav">
+      {% if not g.user %}
+        <a href="{{ url_for('login') }}">Sign in</a>
+        <a class="btn btn-sm" href="{{ url_for('register') }}">Join</a>
+      {% else %}
+        {% if g.user.role == 'customer' %}
+          <a href="{{ url_for('orders') }}">Orders</a>
+        {% elif g.user.role == 'seller' %}
+          <a href="{{ url_for('seller') }}">My store</a>
+        {% else %}
+          <a href="{{ url_for('admin') }}">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('inbox') }}">Messages{% if unread %} <span class="badge">{{ unread }}</span>{% endif %}</a>
+        {% if g.user.role == 'customer' %}
+          <a href="{{ url_for('cart') }}" class="cart-link">Cart{% if cart_count %} <span class="badge">{{ cart_count }}</span>{% endif %}</a>
+        {% endif %}
+        <a href="{{ url_for('account') }}" title="Account">{{ g.user.name.split()[0] }}</a>
+        <form method="post" action="{{ url_for('logout') }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="link">Sign out</button>
+        </form>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% with msgs = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in msgs %}<div class="flash flash-{{ cat }}" role="status">{{ msg }}</div>{% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <span>Forty Acres Market · every order ships UPS from 110 Inner Campus Drive, Austin, TX 78705</span>
+    <span>{{ settings.return_window_days }}-day returns · questions? message the seller</span>
+  </div>
+</footer>
+
+{% if not g.user or g.user.role == 'customer' %}
+<button class="chat-fab" id="chat-open" aria-controls="chat" aria-expanded="false">Ask Scout</button>
+<section class="chat" id="chat" hidden aria-label="Shopping assistant">
+  <header><div><b>Scout</b><small>Shopping assistant</small></div><button class="link" id="chat-close" aria-label="Close">✕</button></header>
+  <div class="chat-log" id="chat-log" aria-live="polite">
+    <div class="msg bot">Hi! I can find products, explain UPS shipping, and help with orders and returns. Product questions? I'll point you to the seller.</div>
+  </div>
+  <form id="chat-form" autocomplete="off">
+    <input id="chat-input" maxlength="2000" placeholder="Ask about products, shipping, returns…" aria-label="Message Scout" required>
+    <button class="btn btn-sm">Send</button>
+  </form>
+</section>
+{% endif %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

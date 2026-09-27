@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf, thumb with context %}
+{% block title %}{{ 'Edit' if p else 'New' }} product · Forty Acres Market{% endblock %}
+{% block content %}
+<h1>{{ 'Edit ' ~ p.name if p else 'New product' }}</h1>
+{% if p and g.user.role == 'admin' and g.user.id != p.seller_id %}<div class="flash flash-error">Admin override: you are editing {{ p.store_name }}'s product. The change is logged.</div>{% endif %}
+<form method="post" enctype="multipart/form-data" class="card stack form-wide">
+  {{ csrf() }}
+  <label>Name <input name="name" required maxlength="120" value="{{ p.name if p }}"></label>
+  <label>Description <textarea name="description" rows="5" maxlength="4000">{{ p.description if p }}</textarea></label>
+  <div class="row">
+    <label class="grow">Category
+      <select name="category" required>{% for c in categories %}<option {{ 'selected' if p and p.category == c }}>{{ c }}</option>{% endfor %}</select></label>
+    <label>Price ($) <input name="price" required inputmode="decimal" pattern="\d+(\.\d{1,2})?" value="{{ '%.2f'|format(p.price_cents / 100) if p }}"></label>
+    <label>Stock <input type="number" name="stock" required min="0" max="100000" value="{{ p.stock if p else 1 }}"></label>
+  </div>
+  <fieldset class="row">
+    <legend>Packed size for UPS (max 150 lb, 108 in long, 165 in length + girth)</legend>
+    <label>Weight (lb) <input type="number" name="weight_lb" required min="0.01" max="150" step="0.01" value="{{ p.weight_lb if p }}"></label>
+    <label>Length (in) <input type="number" name="length_in" required min="0.1" max="108" step="0.1" value="{{ p.length_in if p }}"></label>
+    <label>Width (in) <input type="number" name="width_in" required min="0.1" max="108" step="0.1" value="{{ p.width_in if p }}"></label>
+    <label>Height (in) <input type="number" name="height_in" required min="0.1" max="108" step="0.1" value="{{ p.height_in if p }}"></label>
+  </fieldset>
+  <div class="row">
+    {% if p %}{{ thumb(p, 'thumb') }}{% endif %}
+    <label class="grow">Photo (PNG, JPEG, GIF or WebP, up to 5 MB) <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+  </div>
+  <div class="row"><button class="btn">Save product</button><a class="btn btn-ghost" href="{{ url_for('seller') if g.user.role == 'seller' else url_for('admin', tab='products') }}">Cancel</a></div>
+</form>
+{% endblock %}

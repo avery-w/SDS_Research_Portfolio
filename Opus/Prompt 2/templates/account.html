@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+{% set u = g.user %}
+<h1>Your account</h1>
+<p class="muted">{{ u.role|capitalize }} account · member since {{ u.created_at.strftime('%B %Y') }}</p>
+<div class="grid cols-2" style="align-items:start">
+  <form method="post" class="card">{{ m.csrf() }}<h2>Profile &amp; default address</h2>
+    {{ m.field('name', 'Name', u.name) }}
+    {{ m.field('email', 'Email', u.email, type='email') }}
+    {{ m.field('street', 'Street address', u.street, required=false) }}
+    <div class="fields-3">{{ m.field('city', 'City', u.city, required=false) }}{{ m.field('state', 'State', u.state, required=false, attrs='maxlength="2"') }}{{ m.field('zip', 'ZIP', u.zip, required=false) }}</div>
+    <button>Save profile</button>
+  </form>
+  <div class="stack">
+    <form method="post" action="{{ url_for('shop.change_password') }}" class="card">{{ m.csrf() }}<h2>Change password</h2>
+      <div class="field"><label for="cp">Current password</label><input id="cp" name="current_password" type="password" required autocomplete="current-password"></div>
+      <div class="field"><label for="np">New password</label><input id="np" name="new_password" type="password" minlength="8" required autocomplete="new-password"></div>
+      <button>Update password</button>
+    </form>
+    {% if u.role != 'admin' %}
+    <form method="post" action="{{ url_for('shop.deactivate_self') }}" class="card" data-confirm="Deactivate your account? You'll be signed out and can't sign back in without contacting support.">{{ m.csrf() }}
+      <h2>Deactivate account</h2>
+      <p class="small muted">Your order history is kept for accounting. {% if u.role == 'seller' %}Your store and listings will be hidden.{% endif %}</p>
+      <div class="field"><label for="dp">Confirm password</label><input id="dp" name="password" type="password" required></div>
+      <button class="danger">Deactivate</button>
+    </form>{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} · {{ title }}{% endblock %}
+{% block body %}
+<div class="empty card">
+  <div class="icon">{{ {401: '🔐', 403: '🚫', 404: '🧭', 409: '⚠️', 413: '📦', 429: '⏳'}.get(code, '🛠️') }}</div>
+  <h1>{{ title }}</h1>
+  <p>{{ message }}</p>
+  <div class="row" style="justify-content:center"><a class="btn" href="{{ url_for('shop.home') }}">Back to shopping</a>
+  {% if request.referrer %}<a class="btn ghost" href="javascript:history.back()">Go back</a>{% endif %}</div>
+</div>
+{% endblock %}

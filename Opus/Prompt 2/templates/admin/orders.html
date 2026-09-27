@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Orders</h1>
+{% include "admin/_nav.html" %}
+<form class="row" style="margin-bottom:12px"><input name="q" value="{{ request.args.get('q', '') }}" placeholder="Order # or customer email" style="flex:1;width:auto">
+  <select name="status" style="width:auto"><option value="">Any item status</option>{% for s in statuses %}<option value="{{ s }}" {{ 'selected' if status == s }}>{{ s.replace('_', ' ') }}</option>{% endfor %}</select><button class="ghost">Filter</button></form>
+<div class="card table-wrap"><table>
+  <tr><th>Order</th><th>Customer</th><th>Status</th><th>Items</th><th class="num">Total</th></tr>
+  {% for o in page.items %}
+  <tr><td><a href="{{ url_for('shop.order', oid=o.id) }}"><strong>#{{ o.id }}</strong></a><br><span class="small muted">{{ o.created_at.strftime('%b %d, %Y') }}</span></td>
+    <td class="small">{{ o.user.name }}<br>{{ o.user.email }}</td><td>{{ m.status(o.status) }}</td>
+    <td class="small">{{ o.items|length }} · {{ o.items|map(attribute='store.name')|unique|join(', ') }}</td><td class="num">{{ money(o.total_cents) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No orders match.</td></tr>{% endfor %}
+</table></div>
+{{ m.pager(page, 'admin.orders') }}
+{% endblock %}

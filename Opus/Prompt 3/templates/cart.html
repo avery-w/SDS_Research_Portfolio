@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Cart</h1>
+{% if not lines %}<p>Your cart is empty. <a href="{{ url_for('shop.index') }}">Keep shopping</a></p>{% else %}
+<table>
+  <tr><th>Item</th><th>Store</th><th>Price</th><th>Qty</th><th></th></tr>
+  {% for p, qty in lines %}
+  <tr>
+    <td><a href="{{ url_for('shop.product', product_id=p.id) }}">{{ p.name }}</a></td>
+    <td>{{ p.store.name }}</td>
+    <td>{{ p.price_cents|money }}</td>
+    <td>
+      <form method="post" action="{{ url_for('shop.cart_update', product_id=p.id) }}" class="row">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="number" name="qty" value="{{ qty }}" min="0" max="99" aria-label="Quantity"><button class="secondary">Update</button>
+      </form>
+    </td>
+    <td>{{ (p.price_cents * qty)|money }}</td>
+  </tr>
+  {% endfor %}
+  <tr><th colspan="4">Subtotal</th><th>{{ subtotal|money }}</th></tr>
+</table>
+{% if current_user.is_authenticated and current_user.role == 'customer' %}
+<form method="post" action="{{ url_for('shop.checkout') }}" class="card" id="checkout">
+  <h2>Ship to</h2>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Full name <input name="name" maxlength="100" required value="{{ current_user.name }}"></label>
+  {% set a = current_user %}{% include "_address.html" %}
+  <p><button type="button" class="secondary" id="get-rates" data-url="{{ url_for('shop.api_rates') }}">Get UPS rates</button>
+     <span class="muted small">Ships from {{ origin.street }}, {{ origin.city }}, {{ origin.state }} {{ origin.zip }}</span></p>
+  <fieldset id="rates"><legend>Shipping</legend>
+    {% for code, (name, _) in services.items() %}
+      <label><input type="radio" name="service" value="{{ code }}" required {{ 'checked' if loop.first }}> {{ name }} <span data-rate="{{ code }}"></span></label>
+    {% endfor %}
+  </fieldset>
+  <p id="rate-error" class="flash error" hidden></p>
+  <button>Place order</button>
+</form>
+{% elif not current_user.is_authenticated %}
+<p><a href="{{ url_for('auth.login') }}">Log in</a> or <a href="{{ url_for('auth.register') }}">sign up</a> to check out.</p>
+{% else %}<p class="muted">Only customer accounts can check out.</p>{% endif %}
+{% endif %}
+{% endblock %}

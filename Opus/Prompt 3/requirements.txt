@@ -1,0 +1,9 @@
+Flask>=3.0
+Flask-SQLAlchemy>=3.1
+Flask-Login>=0.6.3
+Flask-WTF>=1.2
+Flask-Limiter>=3.5
+python-dotenv>=1.0
+Pillow>=10.0
+pgeocode>=0.5
+anthropic>=1.8

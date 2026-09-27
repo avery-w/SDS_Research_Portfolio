@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block title %}Account · Forty Acres Market{% endblock %}
+{% block content %}
+<h1>Your account</h1>
+<div class="two-col">
+  <form method="post" class="card stack">
+    {{ csrf() }}
+    <h3>Profile</h3>
+    <p class="muted small">{{ g.user.email }} · {{ g.user.role|capitalize }} since {{ g.user.created_at|dt }}</p>
+    <label>Name <input name="name" required maxlength="100" value="{{ g.user.name }}"></label>
+    <label>Street <input name="street" maxlength="200" value="{{ g.user.street }}"></label>
+    <div class="row">
+      <label class="grow">City <input name="city" maxlength="100" value="{{ g.user.city }}"></label>
+      <label>State <input name="state" maxlength="2" size="3" value="{{ g.user.state }}"></label>
+      <label>ZIP <input name="zip" maxlength="10" size="7" value="{{ g.user.zip }}"></label>
+    </div>
+    <button class="btn">Save profile</button>
+  </form>
+  <div class="stack">
+    <form method="post" action="{{ url_for('change_password') }}" class="card stack">
+      {{ csrf() }}
+      <h3>Change password</h3>
+      <label>Current password <input type="password" name="current_password" required autocomplete="current-password"></label>
+      <label>New password <input type="password" name="new_password" required minlength="8" autocomplete="new-password"></label>
+      <button class="btn btn-ghost">Update password</button>
+    </form>
+    {% if g.user.role != 'admin' %}
+    <form method="post" action="{{ url_for('close_account') }}" class="card stack danger-zone" data-confirm="Close your account? You'll be signed out and can't sign back in.">
+      {{ csrf() }}
+      <h3>Close account</h3>
+      <p class="muted small">Your order history is kept for the sellers' records.{% if g.user.role == 'seller' %} Your store and products will be hidden.{% endif %}</p>
+      <label>Confirm password <input type="password" name="password" required></label>
+      <button class="btn btn-danger">Close my account</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

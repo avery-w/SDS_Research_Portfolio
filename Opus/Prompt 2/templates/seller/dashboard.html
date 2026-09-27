@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>{{ s.name }}</h1>
+{% include "seller/_nav.html" %}
+<div class="stats">
+  <div class="stat"><div class="label">Gross sales (all time)</div><div class="value">{{ money(gross) }}</div></div>
+  <div class="stat"><div class="label">Your payout after {{ commission|round(1) }}% fee</div><div class="value">{{ money(net) }}</div></div>
+  <div class="stat"><div class="label">Orders · units</div><div class="value">{{ orders }} · {{ units }}</div></div>
+  <a class="stat" href="{{ url_for('seller.orders', status='pending') }}" style="color:inherit"><div class="label">Ready to ship</div><div class="value">{{ to_ship }}</div></a>
+  <a class="stat" href="{{ url_for('seller.orders', status='return_requested') }}" style="color:inherit"><div class="label">Return requests</div><div class="value">{{ returns }}</div></a>
+</div>
+<div class="grid cols-2">
+  <section class="card"><h2>Sales, last 30 days</h2>{{ m.revenue_chart(series, 'Sales') }}</section>
+  <section class="card"><h2>Top products</h2>
+    <div class="hbars">{% set peak = (top|map(attribute=2)|max) if top else 1 %}
+    {% for name, units, cents in top %}<div class="hbar"><div class="meta"><span>{{ name }} <span class="muted small">· {{ units }} sold</span></span><strong>{{ money(cents) }}</strong></div>
+      <div class="track"><div class="fill" style="width:{{ (100 * cents / peak)|round(1) }}%"></div></div></div>
+    {% else %}<p class="muted small">No sales yet. Share your storefront link!</p>{% endfor %}</div>
+  </section>
+</div>
+<section class="card" style="margin-top:20px"><div class="row between"><h2>Low stock</h2><a href="{{ url_for('seller.products') }}">Manage inventory →</a></div>
+  {% for p in low_stock %}<div class="row between" style="padding:6px 0"><span>{{ p.name }}</span><span class="badge {{ 'bad' if p.stock == 0 else 'warn' }}">{{ p.stock }} left</span></div>
+  {% else %}<p class="muted small">Everything is well stocked. 👍</p>{% endfor %}
+</section>
+{% endblock %}

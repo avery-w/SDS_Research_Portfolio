@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_macros.html" import thumb, csrf with context %}
+{% block title %}{{ p.name }} · Forty Acres Market{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="{{ url_for('index') }}">Market</a> / <a href="{{ url_for('index', category=p.category) }}">{{ p.category }}</a></nav>
+{% if not p.visible %}<div class="flash flash-error">This product is hidden from shoppers (inactive product, store or seller).</div>{% endif %}
+<section class="product-page">
+  {{ thumb(p, 'hero-img') }}
+  <div class="stack">
+    <a class="muted" href="{{ url_for('index', store=p.store_id) }}">{{ p.store_name }}</a>
+    <h1>{{ p.name }}</h1>
+    <div class="price big">{{ p.price_cents|money }}</div>
+    <p class="prose">{{ p.description }}</p>
+    <dl class="specs">
+      <dt>Ships</dt><dd>UPS from Austin, TX 78705</dd>
+      <dt>Package</dt><dd>{{ p.weight_lb }} lb · {{ p.length_in|round(1) }}×{{ p.width_in|round(1) }}×{{ p.height_in|round(1) }} in</dd>
+      <dt>Availability</dt><dd>{{ 'Sold out' if p.stock == 0 else p.stock ~ ' in stock' }}</dd>
+    </dl>
+
+    {% if not g.user or g.user.role == 'customer' %}
+      {% if p.stock > 0 and p.visible %}
+      <form method="post" action="{{ url_for('cart_add') }}" class="row">
+        {{ csrf() }}
+        <input type="hidden" name="product_id" value="{{ p.id }}">
+        <label class="qty">Qty <input type="number" name="qty" value="1" min="1" max="{{ [p.stock, 99]|min }}"></label>
+        <button class="btn">Add to cart</button>
+      </form>
+      {% endif %}
+      <form method="post" action="{{ url_for('message_start') }}" class="card message-box stack" id="message">
+        {{ csrf() }}
+        <h3>Questions? Message {{ p.store_name }}</h3>
+        <p class="muted small">Sellers know their products best: sizing, materials, custom orders, shipping timing.</p>
+        <input type="hidden" name="store_id" value="{{ p.store_id }}">
+        <input type="hidden" name="product_id" value="{{ p.id }}">
+        {% if orders %}
+        <label>About an order (optional)
+          <select name="order_id"><option value="">No specific order</option>
+            {% for o in orders %}<option value="{{ o.id }}">Order #{{ o.id }} · {{ o.created_at|dt }}</option>{% endfor %}
+          </select>
+        </label>
+        {% endif %}
+        <textarea name="body" rows="3" maxlength="2000" required placeholder="Hi! I had a question about the {{ p.name }}…"></textarea>
+        {% if g.user %}<button class="btn btn-ghost">Send message</button>
+        {% else %}<a class="btn btn-ghost" href="{{ url_for('login', next=request.path ~ '#message') }}">Sign in to message the seller</a>{% endif %}
+      </form>
+    {% elif g.user.role == 'admin' or g.user.id == p.seller_id %}
+      <div class="row">
+        <a class="btn" href="{{ url_for('product_form', pid=p.id) }}">Edit product</a>
+        <form method="post" action="{{ url_for('product_toggle', pid=p.id) }}">{{ csrf() }}
+          <button class="btn btn-ghost">{{ 'Hide from shop' if p.is_active else 'Make live' }}</button></form>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if related %}
+<h2 class="section-title">More in {{ p.category }}</h2>
+<div class="grid">
+  {% for r in related %}
+  <a class="card product-card" href="{{ url_for('product', pid=r.id) }}">{{ thumb(r) }}
+    <div class="product-meta"><span class="muted small">{{ r.store_name }}</span><b class="product-name">{{ r.name }}</b><span class="price">{{ r.price_cents|money }}</span></div></a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

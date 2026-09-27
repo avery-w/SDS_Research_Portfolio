@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+{% set role = g.user.role %}
+<div class="row between">
+  <div><h1 style="margin:0">Order #{{ o.id }}</h1><p class="muted">Placed {{ o.created_at.strftime('%B %d, %Y at %I:%M %p') }} UTC{% if role != 'customer' %} by {{ o.user.name }} ({{ o.user.email }}){% endif %}</p></div>
+  <div class="row">{{ m.status(o.status) }}
+    {% if role == 'customer' and o.cancellable %}
+    <form method="post" action="{{ url_for('shop.cancel_order', oid=o.id) }}" data-confirm="Cancel this entire order?">{{ m.csrf() }}<button class="danger sm">Cancel order</button></form>{% endif %}
+    {% if role == 'admin' %}
+    <form method="post" action="{{ url_for('admin.force_cancel', oid=o.id) }}" data-confirm="Admin override: cancel every open item on this order and restock?">{{ m.csrf() }}<button class="danger sm">Force cancel</button></form>{% endif %}
+  </div>
+</div>
+<div class="grid split" style="align-items:start;margin-top:16px">
+  <div class="stack">
+  {% for i in items %}
+    <section class="card">
+      <div class="row between">
+        <div><strong>{{ i.qty }} × {{ i.name }}</strong><br><span class="small muted">{{ i.store.name }} · {{ money(i.unit_price_cents) }} each</span></div>
+        <div class="row">{{ m.status(i.status) }}<strong>{{ money(i.line_cents) }}</strong></div>
+      </div>
+      {% if i.tracking %}<p class="small">UPS tracking: <code>{{ i.tracking }}</code></p>{% endif %}
+      {% if i.return_reason %}<p class="small muted">Return reason: “{{ i.return_reason }}”</p>{% endif %}
+      <div class="row" style="margin-top:10px">
+      {% if role == 'customer' %}
+        {% if i.status == 'delivered' %}
+        <details><summary class="btn ghost sm">Request a return</summary>
+          <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='return_requested') }}" style="margin-top:8px">{{ m.csrf() }}
+            <textarea name="reason" minlength="5" maxlength="500" required placeholder="What's wrong? (returns accepted within {{ window }} days of delivery)"></textarea>
+            <button class="sm" style="margin-top:6px">Submit return request</button></form></details>
+        {% endif %}
+        <a class="btn ghost sm" href="{{ url_for('shop.new_message', store_id=i.store_id, order_id=o.id, product_id=i.product_id) }}">💬 Message seller</a>
+      {% elif role == 'seller' %}
+        {% if i.status == 'pending' %}
+        <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='shipped') }}" class="inline">{{ m.csrf() }}
+          <input name="tracking" placeholder="1Z… (blank = generate)" maxlength="18" style="width:200px" aria-label="UPS tracking number"><button class="sm">Mark shipped</button></form>
+        <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='cancelled') }}" data-confirm="Cancel this item and refund the customer?">{{ m.csrf() }}<button class="ghost sm">Can't fulfil: cancel</button></form>
+        {% elif i.status == 'shipped' %}
+        <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='delivered') }}">{{ m.csrf() }}<button class="sm">Mark delivered</button></form>
+        {% elif i.status == 'return_requested' %}
+        <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='returned') }}">{{ m.csrf() }}<button class="sm">Approve return &amp; refund</button></form>
+        <form method="post" action="{{ url_for('shop.item_action', iid=i.id, status='return_rejected') }}" data-confirm="Reject this return?">{{ m.csrf() }}<button class="ghost sm">Reject</button></form>
+        {% endif %}
+      {% elif role == 'admin' %}
+        <form method="post" action="{{ url_for('admin.override_item', iid=i.id) }}" class="inline" data-confirm="Apply admin override to this item?">{{ m.csrf() }}
+          <select name="status" aria-label="New status">{% for s in ['pending', 'shipped', 'delivered', 'cancelled', 'return_requested', 'returned', 'return_rejected'] if s != i.status %}<option value="{{ s }}">{{ s.replace('_', ' ') }}</option>{% endfor %}</select>
+          <input name="reason" type="hidden" value="Admin-initiated return">
+          <button class="sm">Override status</button></form>
+      {% endif %}
+      </div>
+    </section>
+  {% endfor %}
+  </div>
+  <aside class="card">
+    <h2>Shipping</h2>
+    <p>{{ o.ship_name }}<br>{{ o.ship_street }}<br>{{ o.ship_city }}, {{ o.ship_state }} {{ o.ship_zip }}</p>
+    <p class="small muted">{{ o.shipping_service }} from Austin, TX 78705</p>
+    {% if role != 'seller' %}
+    <table class="totals">
+      <tr><td>Subtotal</td><td class="num">{{ money(o.subtotal_cents) }}</td></tr>
+      <tr><td>Shipping</td><td class="num">{{ money(o.shipping_cents) if o.shipping_cents else 'FREE' }}</td></tr>
+      <tr><td>Tax</td><td class="num">{{ money(o.tax_cents) }}</td></tr>
+      <tr class="grand"><td>Total</td><td class="num">{{ money(o.total_cents) }}</td></tr>
+    </table>{% endif %}
+  </aside>
+</div>
+{% endblock %}

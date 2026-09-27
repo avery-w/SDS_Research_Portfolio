@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>Users</h1>
+{% include "admin/_nav.html" %}
+<div class="grid split" style="align-items:start">
+<div>
+  <form class="row" style="margin-bottom:12px"><input name="q" value="{{ request.args.get('q', '') }}" placeholder="Search name or email" style="flex:1;width:auto">
+    <select name="role" style="width:auto"><option value="">All roles</option>{% for r in roles %}<option {{ 'selected' if request.args.role == r }}>{{ r }}</option>{% endfor %}</select><button class="ghost">Filter</button></form>
+  <div class="card table-wrap"><table>
+    <tr><th>User</th><th>Role</th><th>Status</th><th></th></tr>
+    {% for u in page.items %}
+    <tr><td><strong>{{ u.name }}</strong><br><span class="small muted">{{ u.email }} · joined {{ u.created_at.strftime('%b %d, %Y') }}</span>{% if u.store %}<br><span class="small">🏪 {{ u.store.name }}</span>{% endif %}</td>
+      <td>{% if u.id != g.user.id %}<form method="post" action="{{ url_for('admin.update_user', uid=u.id) }}" class="inline">{{ m.csrf() }}<input type="hidden" name="action" value="set_role">
+        <select name="role" aria-label="Role for {{ u.email }}" onchange="this.form.requestSubmit()">{% for r in roles %}<option {{ 'selected' if u.role == r }}>{{ r }}</option>{% endfor %}</select></form>{% else %}{{ u.role }} (you){% endif %}</td>
+      <td>{% if u.is_active %}<span class="badge ok">Active</span>{% else %}<span class="badge bad">Deactivated</span>{% endif %}</td>
+      <td class="right">{% if u.id != g.user.id %}<form method="post" action="{{ url_for('admin.update_user', uid=u.id) }}" data-confirm="{{ 'Deactivate' if u.is_active else 'Reactivate' }} {{ u.email }}?">{{ m.csrf() }}
+        <input type="hidden" name="action" value="{{ 'deactivate' if u.is_active else 'activate' }}"><button class="sm {{ 'danger' if u.is_active else 'ghost' }}">{{ 'Deactivate' if u.is_active else 'Reactivate' }}</button></form>{% endif %}</td></tr>
+    {% endfor %}
+  </table></div>
+  {{ m.pager(page, 'admin.users') }}
+</div>
+<form method="post" action="{{ url_for('admin.create_user') }}" class="card">{{ m.csrf() }}<h2>Create user</h2>
+  {{ m.field('name', 'Name') }}{{ m.field('email', 'Email', type='email') }}
+  <div class="field"><label for="npw">Temporary password</label><input id="npw" name="password" type="password" minlength="8" required></div>
+  <div class="field"><label for="nr">Role</label><select id="nr" name="role">{% for r in roles %}<option>{{ r }}</option>{% endfor %}</select></div>
+  <button class="block">Create</button>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block title %}{{ store.name if store else 'Shop' }} · {{ setting('platform_name') }}{% endblock %}
+{% block body %}
+{% if store %}
+<section class="card" style="margin-bottom:24px">
+  <div class="row between">
+    <div><h1 style="margin:0">{{ store.name }}</h1><p class="muted" style="margin:4px 0 0">{{ store.tagline }}</p></div>
+    {% if not g.user or g.user.role == 'customer' %}<a class="btn ghost" href="{{ url_for('shop.new_message', store_id=store.id) }}">💬 Message seller</a>{% endif %}
+  </div>
+  {% if store.description %}<p>{{ store.description }}</p>{% endif %}
+</section>
+{% else %}
+<div class="row between" style="margin-bottom:12px">
+  <h1 style="margin:0">{% if request.args.q %}Results for “{{ request.args.q }}”{% elif request.args.category %}{{ request.args.category }}{% else %}All products{% endif %}</h1>
+  <span class="muted">{{ page.total }} item{{ 's' if page.total != 1 }}</span>
+</div>
+<form class="row card flat" style="margin-bottom:20px;padding:12px">
+  <input type="hidden" name="q" value="{{ request.args.get('q', '') }}">
+  <select name="category" style="width:auto" aria-label="Category"><option value="">All categories</option>
+    {% for c in CATEGORIES %}<option {{ 'selected' if request.args.category == c }}>{{ c }}</option>{% endfor %}</select>
+  <input name="min" type="number" min="0" step="1" placeholder="Min $" value="{{ request.args.get('min', '') }}" style="width:100px" aria-label="Minimum price">
+  <input name="max" type="number" min="0" step="1" placeholder="Max $" value="{{ request.args.get('max', '') }}" style="width:100px" aria-label="Maximum price">
+  <select name="sort" style="width:auto" aria-label="Sort">
+    {% for k, label in [('new', 'Newest'), ('price_asc', 'Price: low to high'), ('price_desc', 'Price: high to low'), ('name', 'Name')] %}
+    <option value="{{ k }}" {{ 'selected' if request.args.sort == k }}>{{ label }}</option>{% endfor %}</select>
+  <button class="ghost">Apply</button>
+</form>
+{% endif %}
+<div class="grid cols-4">
+  {% for p in page.items %}{{ m.product_card(p) }}{% else %}
+  <div class="empty" style="grid-column:1/-1"><div class="icon">🔍</div><p>Nothing matched. Try a broader search, or ask Bevo Bot for ideas.</p></div>{% endfor %}
+</div>
+{{ m.pager(page, request.endpoint) }}
+{% endblock %}

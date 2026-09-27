@@ -1,0 +1,26 @@
+{% extends "shop/base.html" %}
+{% load humanize %}
+{% block content %}
+<h1>Sales analytics</h1>
+<p><a href="/{{ admin_url }}">Manage users, stores, products, orders and settings</a></p>
+<dl class="stats">
+  <div><dt>Orders</dt><dd>{{ totals.orders|intcomma }}</dd></div>
+  <div><dt>Gross merchandise</dt><dd>${{ totals.gmv|default:0|floatformat:2|intcomma }}</dd></div>
+  <div><dt>Shipping</dt><dd>${{ totals.shipping|default:0|floatformat:2|intcomma }}</dd></div>
+  <div><dt>Platform commission ({{ site.commission_percent }}%)</dt><dd>${{ commission|floatformat:2|intcomma }}</dd></div>
+</dl>
+<p><small>Excludes cancelled and returned orders.</small></p>
+<h2>Last 30 days</h2>
+<table><tr><th>Day</th><th>Orders</th><th>Merchandise</th></tr>
+{% for d in daily %}<tr><td>{{ d.day }}</td><td>{{ d.orders }}</td><td>${{ d.revenue|floatformat:2|intcomma }}</td></tr>{% empty %}<tr><td colspan="3">No sales.</td></tr>{% endfor %}</table>
+<h2>Top products</h2>
+<table><tr><th>Product</th><th>Units</th><th>Revenue</th></tr>
+{% for p in top_products %}<tr><td>{{ p.product_name }}</td><td>{{ p.units }}</td><td>${{ p.revenue|floatformat:2|intcomma }}</td></tr>{% endfor %}</table>
+<h2>Top sellers</h2>
+<table><tr><th>Store</th><th>Orders</th><th>Revenue</th></tr>
+{% for s in top_stores %}<tr><td>{{ s.store__name }}</td><td>{{ s.orders }}</td><td>${{ s.revenue|floatformat:2|intcomma }}</td></tr>{% endfor %}</table>
+<h2>Orders by status</h2>
+<table>{% for s in by_status %}<tr><td>{{ s.status }}</td><td>{{ s.n }}</td></tr>{% endfor %}</table>
+<h2>Users by role</h2>
+<table>{% for u in users %}<tr><td>{{ u.role }}</td><td>{{ u.n }}</td></tr>{% endfor %}</table>
+{% endblock %}

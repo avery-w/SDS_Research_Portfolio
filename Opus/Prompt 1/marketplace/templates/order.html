@@ -1,0 +1,66 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf, status as status_badge %}
+{% block title %}Order #{{ o.id }} · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>Order #{{ o.id }} {{ status_badge(o.status) }}</h1>
+<div class="two-col">
+  <section class="card">
+    <table>
+      <thead><tr><th>Item</th><th class="num">Price</th><th class="num">Qty</th><th class="num">Total</th></tr></thead>
+      <tbody>
+      {% for i in o.items %}<tr><td>{{ i.product_name }}</td><td class="num">{{ i.unit_price_cents | money }}</td><td class="num">{{ i.quantity }}</td><td class="num">{{ (i.unit_price_cents * i.quantity) | money }}</td></tr>{% endfor %}
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">Subtotal</td><td class="num">{{ o.subtotal_cents | money }}</td></tr>
+        <tr><td colspan="3">{{ o.shipping_service }}</td><td class="num">{{ o.shipping_cents | money }}</td></tr>
+        <tr><th colspan="3">Total</th><th class="num">{{ o.total_cents | money }}</th></tr>
+      </tfoot>
+    </table>
+    {% if o.return_reason %}<p><strong>Return reason:</strong> <span class="pre">{{ o.return_reason }}</span></p>{% endif %}
+  </section>
+  <aside class="card">
+    <p><strong>Placed</strong> {{ o.created_at.strftime('%b %d, %Y %H:%M') }} UTC</p>
+    <p><strong>Store</strong> {{ o.store.name }}</p>
+    <p><strong>Ship to</strong><br>{{ o.ship_name }}<br>{{ o.ship_street }}<br>{{ o.ship_city }}, {{ o.ship_state }} {{ o.ship_zip }}</p>
+    <p><strong>Ships from</strong><br>110 Inner Campus Drive<br>Austin, TX 78705</p>
+    {% if o.tracking_number %}<p><strong>UPS tracking</strong><br><a href="https://www.ups.com/track?tracknum={{ o.tracking_number | urlencode }}" rel="noopener" target="_blank">{{ o.tracking_number }}</a></p>{% endif %}
+
+    {% if o.customer_id == current_user.id %}
+      <a class="btn secondary" href="{{ url_for('shop.thread', user_id=o.store.owner_id, order=o.id) }}">Message the seller</a>
+      {% if o.status == 'placed' %}
+        <form method="post" action="{{ url_for('shop.order_action', order_id=o.id, action='cancel') }}" onsubmit="return confirm('Cancel this order?')">
+          {{ csrf() }}<button class="btn danger">Cancel order</button>
+        </form>
+      {% elif o.status in ('shipped', 'delivered') %}
+        <form method="post" action="{{ url_for('shop.order_action', order_id=o.id, action='return') }}" class="form">
+          {{ csrf() }}<label>Why are you returning it? <textarea name="reason" required rows="3"></textarea></label>
+          <button class="btn secondary">Request a return</button>
+        </form>
+      {% endif %}
+    {% endif %}
+
+    {% if current_user.store and current_user.store.id == o.store_id and seller_next %}
+      <h2>Fulfill</h2>
+      {% for s in seller_next %}
+        <form method="post" action="{{ url_for('seller.order_update', order_id=o.id) }}" class="form">
+          {{ csrf() }}<input type="hidden" name="status" value="{{ s }}">
+          {% if s == 'shipped' %}<label>UPS tracking number <input name="tracking_number" required></label>{% endif %}
+          <button class="btn {% if s in ('cancelled', 'return_rejected') %}danger{% else %}secondary{% endif %}">Mark {{ s.replace('_', ' ') }}</button>
+        </form>
+      {% endfor %}
+    {% endif %}
+    {% if current_user.store and current_user.store.id == o.store_id %}
+      <a class="btn secondary" href="{{ url_for('shop.thread', user_id=o.customer_id, order=o.id) }}">Message the customer</a>
+    {% endif %}
+
+    {% if current_user.role == 'admin' %}
+      <h2>Admin override</h2>
+      <form method="post" action="{{ url_for('admin.order_override', order_id=o.id) }}" class="form">
+        {{ csrf() }}
+        <label>Status <select name="status">{% for s in statuses %}<option value="{{ s }}" {% if s == o.status %}selected{% endif %}>{{ s.replace('_', ' ') }}</option>{% endfor %}</select></label>
+        <label>Tracking number <input name="tracking_number" value="{{ o.tracking_number }}"></label>
+        <button class="btn danger">Save override</button>
+      </form>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

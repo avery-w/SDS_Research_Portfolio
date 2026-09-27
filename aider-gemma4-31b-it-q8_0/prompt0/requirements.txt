@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy>=2.0.0
+psycopg2-binary
+pyjwt
+passlib[bcrypt]
+python-multipart
+openai
+langchain
+langchain-openai
+python-dotenv

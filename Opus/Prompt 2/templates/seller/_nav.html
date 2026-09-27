@@ -1,0 +1,6 @@
+<nav class="subnav">
+  {% for ep, label in [('seller.dashboard', 'Overview'), ('seller.orders', 'Orders'), ('seller.products', 'Products & inventory'), ('seller.store', 'Store profile')] %}
+  <a href="{{ url_for(ep) }}" class="{{ 'active' if request.endpoint == ep }}">{{ label }}</a>{% endfor %}
+  {% if g.user.store %}<a href="{{ url_for('shop.store', slug=g.user.store.slug) }}">View storefront ↗</a>{% endif %}
+</nav>
+{% if g.user.store and not g.user.store.is_active %}<div class="card flat" style="border-color:var(--bad);margin-bottom:16px"><strong>Your store is suspended.</strong> Listings are hidden and editing is disabled. You can still fulfil existing orders. Contact support to reinstate.</div>{% endif %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% from "_macros.html" import product_card %}
+{% block title %}{{ store.name }} · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>{{ store.name }}</h1>
+<p class="pre">{{ store.description }}</p>
+{% if current_user.is_authenticated and current_user.id != store.owner_id %}
+<p><a class="btn secondary" href="{{ url_for('shop.thread', user_id=store.owner_id) }}">Message this seller</a></p>
+{% endif %}
+<div class="grid">{% for p in products %}{{ product_card(p) }}{% else %}<p class="empty">No products yet.</p>{% endfor %}</div>
+{% endblock %}

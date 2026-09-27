@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<section class="hero">
+  <div>
+    <span class="badge info">Independent sellers · one checkout · UPS from Austin</span>
+    <h1 style="margin-top:12px">Small shops. Big finds. Shipped from the Forty Acres.</h1>
+    <p>Browse goods from independent sellers, get real UPS rates at checkout, and message makers directly when you have a question.</p>
+    <div class="row"><a class="btn" href="{{ url_for('shop.products') }}">Start shopping</a>
+      {% if not g.user %}<a class="btn ghost" href="{{ url_for('shop.register') }}">Sell with us</a>{% endif %}</div>
+  </div>
+  <div class="art" aria-hidden="true">🛍️</div>
+</section>
+<div class="chips" style="margin-bottom:28px">
+  {% for c in CATEGORIES %}<a class="chip" href="{{ url_for('shop.products', category=c) }}">{{ m.EMOJI[c] }} {{ c }}</a>{% endfor %}
+</div>
+<div class="row between"><h2>Fresh arrivals</h2><a href="{{ url_for('shop.products') }}">See all →</a></div>
+<div class="grid cols-4">{% for p in featured %}{{ m.product_card(p) }}{% else %}<p class="muted">No products yet. Run <code>flask --app app seed</code>.</p>{% endfor %}</div>
+{% if deals %}
+<h2 style="margin-top:40px">Under-budget picks</h2>
+<div class="grid cols-4">{% for p in deals %}{{ m.product_card(p) }}{% endfor %}</div>
+{% endif %}
+{% endblock %}

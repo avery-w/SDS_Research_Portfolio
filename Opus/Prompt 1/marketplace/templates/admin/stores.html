@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Stores · {{ site_name }}{% endblock %}
+{% block content %}
+{% include "admin/_nav.html" %}
+<table class="card">
+  <thead><tr><th>Store</th><th>Owner</th><th class="num">Products</th><th>Manage</th></tr></thead>
+  <tbody>
+  {% for s in stores %}
+    <tr><td><a href="{{ url_for('shop.store', store_id=s.id) }}">{{ s.name }}</a></td><td>{{ s.owner.email }}</td><td class="num">{{ s.products | length }}</td>
+      <td><form method="post" action="{{ url_for('admin.store_update', store_id=s.id) }}" class="row">{{ csrf() }}
+        <input name="name" value="{{ s.name }}" aria-label="Store name">
+        <select name="active" aria-label="Status"><option value="1" {% if s.active %}selected{% endif %}>Active</option><option value="0" {% if not s.active %}selected{% endif %}>Deactivated</option></select>
+        <button class="btn secondary small">Save</button></form></td></tr>
+  {% else %}<tr><td colspan="4" class="empty">No stores yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

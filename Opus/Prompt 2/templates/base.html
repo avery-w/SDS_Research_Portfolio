@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ setting('platform_name') }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+{% set u = g.user %}
+{% if setting('announcement') %}<div class="announce">{{ setting('announcement') }}</div>{% endif %}
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="{{ url_for('shop.home') }}"><span class="mark">🤘</span>{{ setting('platform_name') }}</a>
+    <form class="search" action="{{ url_for('shop.products') }}" role="search">
+      <input name="q" placeholder="Search products, stores, categories…" value="{{ request.args.get('q', '') }}" aria-label="Search">
+      <button aria-label="Search">Search</button>
+    </form>
+    <nav class="main">
+      {% if not u %}
+        <a href="{{ url_for('shop.login') }}">Sign in</a>
+        <a class="btn sm" href="{{ url_for('shop.register') }}">Join</a>
+      {% else %}
+        {% if u.role == 'customer' %}
+          <a href="{{ url_for('shop.orders') }}">Orders</a>
+          <a href="{{ url_for('shop.cart') }}">Cart{% if cart_count %}<span class="count">{{ cart_count }}</span>{% endif %}</a>
+        {% elif u.role == 'seller' %}
+          <a href="{{ url_for('seller.dashboard') }}">Seller hub</a>
+        {% else %}
+          <a href="{{ url_for('admin.dashboard') }}">Admin</a>
+        {% endif %}
+        <a href="{{ url_for('shop.inbox') }}">Messages{% if awaiting_reply %}<span class="count">{{ awaiting_reply }}</span>{% endif %}</a>
+        <a href="{{ url_for('shop.account') }}">{{ u.name.split(' ')[0] }}</a>
+        <form method="post" action="{{ url_for('shop.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="linkish">Sign out</button></form>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% if msgs %}<div class="flashes" role="status">{% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}</div>{% endif %}
+{% endwith %}
+<main><div class="wrap">{% block body %}{% endblock %}</div></main>
+<footer><div class="wrap row between">
+  <span>© {{ setting('platform_name') }} · Ships via UPS from 110 Inner Campus Drive, Austin, TX 78705</span>
+  <span>Questions about an item? Message the seller from any product or order page.</span>
+</div></footer>
+{% if not u or u.role == 'customer' %}
+<button id="chat-fab" aria-controls="chat-panel">💬 Ask Bevo Bot</button>
+<section id="chat-panel" aria-label="Shopping assistant">
+  <div class="head"><strong>Bevo Bot · shopping help</strong><button id="chat-close" aria-label="Close chat">✕</button></div>
+  <div id="chat-log" aria-live="polite"></div>
+  <form id="chat-form"><input maxlength="2000" placeholder="Ask about products, shipping, orders…" aria-label="Message"><button>Send</button></form>
+</section>
+{% endif %}
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

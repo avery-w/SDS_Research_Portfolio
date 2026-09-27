@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% from "_macros.html" import csrf %}
+{% block title %}Chat with {{ other.name }} · {{ site_name }}{% endblock %}
+{% block content %}
+<h1>{{ other.store.name if other.store else other.name }}</h1>
+{% if product %}<p class="muted">About: <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a></p>{% endif %}
+{% if order_id %}<p class="muted">About: <a href="{{ url_for('shop.order', order_id=order_id) }}">order #{{ order_id }}</a></p>{% endif %}
+<div class="card thread">
+  {% for m in msgs %}
+    <div class="bubble {{ 'mine' if m.sender_id == current_user.id else 'theirs' }}">
+      {% if m.product %}<small class="muted">Re: {{ m.product.name }}</small>{% endif %}
+      {% if m.order_id %}<small class="muted">Re: order #{{ m.order_id }}</small>{% endif %}
+      <p class="pre">{{ m.body }}</p>
+      <small class="muted">{{ m.created_at.strftime('%b %d %H:%M') }}</small>
+    </div>
+  {% else %}<p class="muted">Start the conversation below.</p>{% endfor %}
+</div>
+<form method="post" class="form">
+  {{ csrf() }}
+  {% if product %}<input type="hidden" name="product" value="{{ product.id }}">{% endif %}
+  {% if order_id %}<input type="hidden" name="order" value="{{ order_id }}">{% endif %}
+  <label>Message <textarea name="body" rows="3" required maxlength="5000"></textarea></label>
+  <button class="btn">Send</button>
+</form>
+{% endblock %}

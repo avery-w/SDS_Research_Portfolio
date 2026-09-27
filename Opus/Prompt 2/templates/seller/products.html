@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<div class="row between"><h1>{{ s.name }}</h1><a class="btn" href="{{ url_for('seller.new_product') }}">+ New product</a></div>
+{% include "seller/_nav.html" %}
+<div class="card table-wrap"><table>
+  <tr><th>Product</th><th class="num">Price</th><th>Stock</th><th>Status</th><th></th></tr>
+  {% for p in products %}
+  <tr><td><div class="row"><div style="width:48px">{{ m.thumb(p) }}</div><div><strong>{{ p.name }}</strong><br><span class="small muted">{{ p.category }} · {{ p.weight_lb }} lb</span></div></div></td>
+    <td class="num">{{ money(p.price_cents) }}</td>
+    <td><form method="post" action="{{ url_for('seller.set_stock', pid=p.id) }}" class="inline">{{ m.csrf() }}
+      <input name="stock" type="number" min="0" max="100000" value="{{ p.stock }}" style="width:80px" aria-label="Stock for {{ p.name }}"><button class="ghost sm">Set</button></form></td>
+    <td>{% if p.locked %}<span class="badge bad">Removed by admin</span>{% elif p.is_active %}<span class="badge ok">Listed</span>{% else %}<span class="badge">Unlisted</span>{% endif %}</td>
+    <td class="right"><a class="btn ghost sm" href="{{ url_for('seller.edit_product', pid=p.id) }}">Edit</a>
+      {% if not p.locked %}<form method="post" action="{{ url_for('seller.toggle_product', pid=p.id) }}" class="inline">{{ m.csrf() }}<button class="ghost sm">{{ 'Unlist' if p.is_active else 'List' }}</button></form>{% endif %}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No products yet. <a href="{{ url_for('seller.new_product') }}">Add your first one</a>.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% import "macros.html" as m with context %}
+{% block body %}
+<h1>{{ 'Edit ' ~ p.name if p else 'New product' }}</h1>
+{% include "seller/_nav.html" %}
+<form method="post" enctype="multipart/form-data" class="grid cols-2" style="align-items:start">{{ m.csrf() }}
+  <section class="card">
+    {{ m.field('name', 'Product name', p.name if p else '', attrs='maxlength="120"') }}
+    <div class="field"><label for="desc">Description</label><textarea id="desc" name="description" maxlength="5000">{{ old('description', p.description if p else '') }}</textarea></div>
+    <div class="field"><label for="cat">Category</label><select id="cat" name="category" required>
+      {% for c in CATEGORIES %}<option {{ 'selected' if old('category', p.category if p else '') == c }}>{{ c }}</option>{% endfor %}</select></div>
+    <div class="fields-3">
+      {{ m.field('price', 'Price ($)', '%.2f'|format(p.price_cents / 100) if p else '', type='number', attrs='step="0.01" min="0.5"') }}
+      {{ m.field('stock', 'Stock', p.stock if p else 0, type='number', attrs='min="0"') }}
+      <div></div>
+    </div>
+  </section>
+  <section class="card">
+    <h3>Photo</h3>
+    {% if p %}<div style="max-width:200px;margin-bottom:10px">{{ m.thumb(p) }}</div>{% endif %}
+    <div class="field"><input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"><div class="hint">PNG, JPEG, GIF or WebP up to 5 MB.</div></div>
+    <h3>Shipping details</h3>
+    <p class="small muted">Used for UPS rating: dimensional weight is L×W×H ÷ 139, and items over 48 in or 50 lb incur UPS handling surcharges.</p>
+    <div class="fields-3">
+      {{ m.field('length_in', 'Length (in)', p.length_in if p else 10, type='number', attrs='step="0.1" min="0.5" max="108"') }}
+      {{ m.field('width_in', 'Width (in)', p.width_in if p else 8, type='number', attrs='step="0.1" min="0.5" max="108"') }}
+      {{ m.field('height_in', 'Height (in)', p.height_in if p else 4, type='number', attrs='step="0.1" min="0.5" max="108"') }}
+    </div>
+    {{ m.field('weight_lb', 'Weight (lb)', p.weight_lb if p else 1, type='number', attrs='step="0.01" min="0.05" max="150"') }}
+    <button class="block">{{ 'Save changes' if p else 'Publish product' }}</button>
+  </section>
+</form>
+{% endblock %}
