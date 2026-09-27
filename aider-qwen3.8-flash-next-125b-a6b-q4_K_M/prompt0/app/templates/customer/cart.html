@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Cart{% endblock %}
+{% block content %}
+<h2>Your Cart</h2>
+{% if cart and cart.items %}
+<table class="table">
+    <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Subtotal</th><th></th></tr></thead>
+    <tbody>
+    {% for item in cart.items %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>${{ "%.2f"|format(item.product.price|float) }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>${{ "%.2f"|format((item.product.price|float) * item.quantity) }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('customer.remove_from_cart', item_id=item.id) }}">
+                <button class="btn btn-sm btn-danger">Remove</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('customer.checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

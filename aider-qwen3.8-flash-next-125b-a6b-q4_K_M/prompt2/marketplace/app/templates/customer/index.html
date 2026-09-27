@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Browse Products{% endblock %}
+{% block content %}
+<h1>Browse Products</h1>
+<form method="get" action="/api/customer/products">
+    <input type="text" name="q" placeholder="Search products...">
+    <button type="submit">Search</button>
+</form>
+{% endblock %}

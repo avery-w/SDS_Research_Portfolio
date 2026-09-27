@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Search Results{% endblock %}
+{% block content %}
+<h2>Results for "{{ q }}"</h2>
+<div class="row">
+{% for product in products %}
+<div class="col-md-3 mb-4">
+    <div class="card card-product h-100 shadow-sm">
+        {% if product.images %}<img src="{{ product.images[0].image_url }}" class="card-img-top" style="height:160px;object-fit:cover;">{% endif %}
+        <div class="card-body">
+            <h6 class="card-title">{{ product.name }}</h6>
+            <p class="fw-bold">${{ "%.2f"|format(product.price|float) }}</p>
+            <a href="{{ url_for('customer.product_detail', product_id=product.id) }}" class="btn btn-sm btn-outline-primary w-100">View</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+{% endblock %}

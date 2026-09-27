@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+<h2>Categories</h2>
+<form method="POST" class="mb-3 d-flex gap-2">
+<input name="name" class="form-control" placeholder="Category name" required>
+<select name="parent_id" class="form-select" style="max-width:200px"><option value="">No parent</option>{% for c in categories %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+<button class="btn btn-primary">Add</button>
+</form>
+<ul>{% for c in categories %}<li>{{ c.name }} {% if c.parent %}(child of {{ c.parent.name }}){% endif %}</li>{% endfor %}</ul>
+{% endblock %}

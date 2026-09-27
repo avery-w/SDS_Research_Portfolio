@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Seller Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ store.name if store else 'My Store' }}</h2>
+    <a href="{{ url_for('seller.create_product') }}" class="btn btn-primary">+ Add Product</a>
+</div>
+{% if not store %}
+<div class="alert alert-info">You haven't created a store yet. <a href="{{ url_for('seller.create_store') }}">Create one now.</a></div>
+{% endif %}
+<h4>Products</h4>
+<div class="row">
+{% for p in products %}
+<div class="col-md-4 mb-3">
+    <div class="card">
+        <div class="card-body">
+            <h6>{{ p.name }}</h6>
+            <p class="small">Stock: {{ p.stock_quantity }} | ${{ "%.2f"|format(p.price|float) }}</p>
+            <a href="{{ url_for('seller.edit_product', product_id=p.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+        </div>
+    </div>
+</div>
+{% endfor %}
+</div>
+<h4 class="mt-4">Orders</h4>
+{% for order in orders %}
+<div class="card mb-2">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <strong>{{ order.order_number }}</strong>
+            <span class="badge bg-secondary ms-2">{{ order.status }}</span>
+            <p class="small mb-0">Tracking: {{ order.tracking_number or 'N/A' }}</p>
+        </div>
+        {% if order.status == 'confirmed' %}
+        <form method="POST" action="{{ url_for('seller.fulfill_order', order_id=order.id) }}" class="d-flex gap-1">
+            <input name="tracking_number" class="form-control form-control-sm" placeholder="Tracking #" required>
+            <button class="btn btn-sm btn-success">Ship</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

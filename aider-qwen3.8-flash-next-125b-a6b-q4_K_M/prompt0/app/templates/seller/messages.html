@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<h2>Messages</h2>
+{% for conv in conversations %}
+<div class="card mb-2">
+    <div class="card-body">
+        <strong>{{ conv.subject or 'No subject' }}</strong>
+        <span class="text-muted small">— from {{ conv.customer.username }}</span>
+        {% for msg in conv.messages %}
+            <p class="small mb-0"><strong>{{ msg.sender.username }}:</strong> {{ msg.body }}</p>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

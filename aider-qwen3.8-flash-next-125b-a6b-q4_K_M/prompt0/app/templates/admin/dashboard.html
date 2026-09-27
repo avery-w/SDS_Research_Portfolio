@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h5>{{ overview.total_users }}</h5><p class="text-muted">Users</p></div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h5>{{ overview.total_sellers }}</h5><p class="text-muted">Sellers</p></div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h5>{{ overview.total_products }}</h5><p class="text-muted">Products</p></div></div></div>
+    <div class="col-md-3"><div class="card text-center"><div class="card-body"><h5>${{ "%.2f"|format(overview.total_revenue) }}</h5><p class="text-muted">Revenue</p></div></div></div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Top Selling Products</h5>
+        <table class="table table-sm"><thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+        <tbody>{% for p in top_products %}<tr><td>{{ p.name }}</td><td>{{ p.quantity }}</td><td>${{ "%.2f"|format(p.revenue) }}</td></tr>{% endfor %}</tbody></table>
+    </div>
+    <div class="col-md-6">
+        <h5>Order Status Breakdown</h5>
+        <ul>{% for status, count in status_breakdown.items() %}<li>{{ status }}: {{ count }}</li>{% endfor %}</ul>
+    </div>
+</div>
+{% endblock %}

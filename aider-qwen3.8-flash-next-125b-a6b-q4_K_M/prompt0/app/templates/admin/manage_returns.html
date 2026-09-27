@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Return Requests{% endblock %}
+{% block content %}
+<h2>Return Requests</h2>
+{% for r in returns %}
+<div class="card mb-2"><div class="card-body">
+<strong>Order {{ r.order.order_number }}</strong> — Status: {{ r.status }}
+<p class="small">Reason: {{ r.reason }}</p>
+{% if r.status == 'pending' %}
+<form method="POST" action="{{ url_for('admin.resolve_return', return_id=r.id) }}" class="d-flex gap-1">
+<select name="status" class="form-select form-select-sm"><option value="approved">Approve</option><option value="denied">Deny</option></select>
+<input name="note" class="form-control form-control-sm" placeholder="Admin note">
+<button class="btn btn-sm btn-primary">Resolve</button>
+</form>
+{% endif %}
+</div></div>
+{% endfor %}
+{% endblock %}

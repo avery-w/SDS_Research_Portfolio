@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Manage Products{% endblock %}
+{% block content %}
+<h2>Products</h2>
+<table class="table"><thead><tr><th>Name</th><th>Price</th><th>Stock</th><th>Active</th><th>Actions</th></tr></thead>
+<tbody>{% for p in products.items %}<tr><td>{{ p.name }}</td><td>${{ "%.2f"|format(p.price|float) }}</td><td>{{ p.stock_quantity }}</td><td>{{ 'Yes' if p.is_active else 'No' }}</td>
+<td>{% if p.is_active %}<form method="POST" action="{{ url_for('admin.deactivate_product', product_id=p.id) }}" class="d-inline"><button class="btn btn-sm btn-danger">Deactivate</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

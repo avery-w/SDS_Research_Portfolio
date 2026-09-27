@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8 offset-md-2">
+        <form action="{{ url_for('customer.search') }}" method="GET" class="d-flex">
+            <input name="q" class="form-control me-2" placeholder="Search products...">
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+</div>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-3 mb-4">
+        <div class="card card-product h-100 shadow-sm">
+            {% if product.images %}
+                <img src="{{ product.images[0].image_url }}" class="card-img-top" style="height:180px;object-fit:cover;">
+            {% endif %}
+            <div class="card-body">
+                <h6 class="card-title">{{ product.name }}</h6>
+                <p class="text-muted small">{{ product.store.name }}</p>
+                <p class="fw-bold">${{ "%.2f"|format(product.price|float) }}</p>
+                <a href="{{ url_for('customer.product_detail', product_id=product.id) }}" class="btn btn-sm btn-outline-primary w-100">View</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

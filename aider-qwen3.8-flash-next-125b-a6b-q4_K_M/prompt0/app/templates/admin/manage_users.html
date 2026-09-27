@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block content %}
+<h2>Users</h2>
+<table class="table">
+<thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead>
+<tbody>
+{% for u in users.items %}
+<tr>
+    <td>{{ u.username }}</td><td>{{ u.email }}</td><td>{{ u.role }}</td>
+    <td>{{ 'Yes' if u.is_active_account else 'No' }}</td>
+    <td>
+        {% if u.is_active_account %}
+        <form method="POST" action="{{ url_for('admin.deactivate_user', user_id=u.id) }}" class="d-inline"><button class="btn btn-sm btn-danger">Deactivate</button></form>
+        {% else %}
+        <form method="POST" action="{{ url_for('admin.reactivate_user', user_id=u.id) }}" class="d-inline"><button class="btn btn-sm btn-success">Reactivate</button></form>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}
+</tbody></table>
+<nav><ul class="pagination justify-content-center">
+{% for page in users.iter_pages() %}<li class="page-item"><a class="page-link" href="?page={{ page }}">{{ page }}</a></li>{% endfor %}
+</ul></nav>
+{% endblock %}

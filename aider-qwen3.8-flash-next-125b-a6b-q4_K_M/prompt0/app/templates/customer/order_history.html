@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}My Orders{% endblock %}
+{% block content %}
+<h2>Order History</h2>
+{% for order in orders %}
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <strong>{{ order.order_number }}</strong>
+            <span class="badge bg-secondary">{{ order.status }}</span>
+        </div>
+        <p class="small text-muted">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }} — Total: ${{ "%.2f"|format(order.total|float) }}</p>
+        {% for item in order.items %}
+            <p class="small mb-0">{{ item.product.name }} × {{ item.quantity }} — ${{ "%.2f"|format(item.unit_price|float) }}</p>
+        {% endfor %}
+        <div class="mt-2 d-flex gap-2">
+            {% if order.status in ['pending','confirmed'] %}
+            <form method="POST" action="{{ url_for('customer.cancel_order', order_id=order.id) }}">
+                <button class="btn btn-sm btn-outline-danger">Cancel</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('customer.request_return', order_id=order.id) }}" class="d-flex gap-1">
+                <input name="reason" class="form-control form-control-sm" placeholder="Return reason" required>
+                <button class="btn btn-sm btn-outline-warning">Request Return</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

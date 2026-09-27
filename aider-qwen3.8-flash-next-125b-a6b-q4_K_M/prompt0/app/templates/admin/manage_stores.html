@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Manage Stores{% endblock %}
+{% block content %}
+<h2>Stores</h2>
+<table class="table"><thead><tr><th>Name</th><th>Owner</th><th>Active</th><th>Actions</th></tr></thead>
+<tbody>{% for s in stores %}<tr><td>{{ s.name }}</td><td>{{ s.owner.username }}</td><td>{{ 'Yes' if s.is_active else 'No' }}</td>
+<td>{% if s.is_active %}<form method="POST" action="{{ url_for('admin.deactivate_store', store_id=s.id) }}" class="d-inline"><button class="btn btn-sm btn-danger">Deactivate</button></form>{% endif %}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

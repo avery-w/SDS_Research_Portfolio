@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        {% for img in product.images %}
+            <img src="{{ img.image_url }}" class="img-fluid rounded mb-2" style="max-height:400px;">
+        {% endfor %}
+    </div>
+    <div class="col-md-6">
+        <h2>{{ product.name }}</h2>
+        <p class="text-muted">Sold by: {{ product.store.name }}</p>
+        <h4 class="text-primary">${{ "%.2f"|format(product.price|float) }}</h4>
+        <p>{{ product.description }}</p>
+        <p>Stock: {{ product.stock_quantity }}</p>
+        <form method="POST" action="{{ url_for('customer.add_to_cart') }}" class="d-flex align-items-center gap-2 mt-3">
+            <input type="hidden" name="product_id" value="{{ product.id }}">
+            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock_quantity }}" class="form-control" style="width:80px;">
+            <button class="btn btn-success">Add to Cart</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
